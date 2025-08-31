@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework import status
 from app.services.accountsService import AccountsService
-from app.mapping.accountsMapping import AccountsMapping
+from app.mapping.accountMapping import AccountsMapping
 from app.utils.baseResponse import BaseResponse
 from app.utils.dictHelper import DictHelper
 

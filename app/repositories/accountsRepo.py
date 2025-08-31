@@ -1,6 +1,6 @@
 import uuid
 from django.utils.timezone import datetime, now
-from app.entities.accounts import Accounts
+from app.entities.account import Accounts
 from django.core.paginator import Paginator
 
 

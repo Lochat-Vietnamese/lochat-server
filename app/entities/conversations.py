@@ -1,7 +1,7 @@
 import uuid
 from django.db import models
 from django.utils.timezone import now
-from app.entities.accounts import Accounts
+from app.entities.account import Accounts
 
 class Conversations(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

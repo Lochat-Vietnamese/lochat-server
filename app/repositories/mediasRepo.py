@@ -1,7 +1,7 @@
 import uuid
 from django.utils.timezone import datetime, now
 from app.entities.medias import Medias
-from app.entities.accounts import Accounts
+from app.entities.account import Accounts
 from app.enums.mediaTypes import MediaTypes
 from django.db.models import Q
 

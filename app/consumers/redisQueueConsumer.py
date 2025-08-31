@@ -3,7 +3,7 @@ import json
 import time
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
-from app.mapping.accountsMapping import AccountsMapping
+from app.mapping.accountMapping import AccountsMapping
 from app.mapping.mediasMapping import MediasMapping
 from app.mapping.messagesMapping import MessagesMapping
 from app.utils.redisClient import RedisClient
