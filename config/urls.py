@@ -16,19 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from app.controllers.accountsController import AccountsController
-from app.controllers.conversationsController import ConversationsController
-from app.controllers.mediasController import MediasController
-from app.controllers.messagesController import MessagesController
-from app.controllers.accountsConversationsController import AccountsConversationsController
-from app.controllers.authController import AuthController; 
+from app.controllers.accountController import AccountController
+from app.controllers.authController import AuthController
+from app.controllers.profileController import ProfileController
+from app.controllers.relationController import RelationController; 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('<str:action>', AuthController.as_view(), name='accounts_action'),
-    path('user/<str:action>', AccountsController.as_view(), name='accounts_action'),
-    path('media/<str:action>', MediasController.as_view(), name='medias_action'),
-    path('message/<str:action>', MessagesController.as_view(), name='messages_action'),
-    path('conversation/<str:action>', ConversationsController.as_view(), name='conversations_action'),
-    path('account-conversation/<str:action>', AccountsConversationsController.as_view(), name='AC_action'),
+    path('<str:action>', AuthController.as_view(), name='auth_action'),
+    path('account/<str:action>', AccountController.as_view(), name='account_action'),
+    path('profile/<str:action>', ProfileController.as_view(), name='profile_action'),
+    path('relation/<str:action>', RelationController.as_view(), name='relation_action'),
 ]
