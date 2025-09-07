@@ -88,7 +88,7 @@ DATABASES = {
         "NAME": "lochat",
         "USER": "admin",
         "PASSWORD": "admin",
-        "HOST": "database",
+        "HOST": "lochatdb",
         "PORT": "5432",
     }
 }
@@ -167,7 +167,7 @@ REDIS_CONFIG = {
 
 PUBLIC_ENDPOINTS = [
     '/login',
-    '/registry',
+    '/sign-up',
     '/restock-token',
 ]
 

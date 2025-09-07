@@ -1,12 +1,14 @@
 import uuid
 from typing import Dict
+from app.entities.account import Account
+from app.entities.profile import Profile
 from app.repositories.accountRepo import AccountRepo
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import check_password, make_password
 from app.services.profileService import ProfileService
+from app.utils.fieldsFilter import FieldsFilter
 from app.utils.redisClient import RedisClient
 from asgiref.sync import sync_to_async
-
 
 class AccountService:
     @staticmethod
@@ -41,7 +43,7 @@ class AccountService:
         try:
             if username and str(username).strip():
                 return await sync_to_async(AccountRepo.find_by_username)(
-                    username, is_active
+                    username=username, is_active=is_active
                 )
             return None
         except Exception as e:
@@ -51,7 +53,7 @@ class AccountService:
     async def get_by_email(email: str, is_active: bool | None = True):
         try:
             if AccountService.is_valid_email(email):
-                return await sync_to_async(AccountRepo.find_by_email)(email, is_active)
+                return await sync_to_async(AccountRepo.find_by_email)(email=email, is_active=is_active)
             return None
         except Exception as e:
             raise e
@@ -111,20 +113,22 @@ class AccountService:
     @staticmethod
     async def login(data: Dict):
         try:
-            username = data.get("username")
-            email = data.get("email")
-            password = data.get("password")
+            username = str(data.get("username")).strip()
+            email = str(data.get("email")).strip()
+            password = str(data.get("password")).strip()
+
+            if not (username or email ) or not password:
+                return None
 
             account = None
             if username:
                 account = await AccountService.get_by_username(str(username).strip())
             elif email:
                 account = await AccountService.get_by_email(str(email).strip())
-
-            if account and check_password(str(password).strip(), account.password):
+            if account and check_password(password, account.password):
                 refresh = RefreshToken.for_user(account)
-                rd = RedisClient.instance()
-                await sync_to_async(rd.add)(
+                rd = await RedisClient.instance()
+                await rd.add(
                     key=f"token_{account.id}",
                     value=str(refresh),
                     expire_sec=7 * 24 * 60 * 60,
@@ -144,21 +148,22 @@ class AccountService:
             username = str(data.get("username")).strip()
             email = str(data.get("email")).strip()
             password = str(data.get("password")).strip()
-            nickname = str(data.get("nickname")).strip()
-            dob = data.get("dob")
             phone_number = str(data.get("phone_number")).strip()
 
             profile = await ProfileService.get_by_phone_number(
                 phone_number=phone_number, is_active=None
             )
             if not profile:
-                profile = await ProfileService.create({"nickname": nickname, "dob": dob, "phone_number": phone_number})
+                profile = await ProfileService.create(FieldsFilter(data=data, entity=Profile))
 
-            if not await AccountService.get_by_username(username, None) and not await AccountService.get_by_email(email, None):
-                password = make_password(password)
-                return await AccountService.create({"profile": profile, "username": username, "email": email, "password": password})
-
-            return None
+            existingUsername = await AccountService.get_by_username(username, None)
+            existingEmail = await AccountService.get_by_email(email, None)
+            if not existingUsername and not existingEmail:
+                data["password"] = make_password(password)
+                data["profile"] = profile
+                return await AccountService.create(FieldsFilter(data=data, entity=Account))
+            else:
+                return None
 
         except Exception as e:
             raise e
@@ -168,18 +173,21 @@ class AccountService:
         try:
             token = RefreshToken(refresh_token)
             account_id = token["user_id"]
-            rd = RedisClient.instance()
-            if await sync_to_async(rd.exists)(f"rft_{account_id}") != 0:
+
+            rd = await RedisClient.instance()
+            if await rd.exists(f"token_{account_id}") != 0:
                 account = await AccountService.get_by_id(account_id)
                 if not account:
                     return None
+                
                 refresh = RefreshToken.for_user(account)
                 access = refresh.access_token
-                await sync_to_async(rd.add)(
+                await rd.add(
                     key=f"token_{account.id}",
                     value=str(refresh),
                     expire_sec=7 * 24 * 60 * 60,
                 )
+
                 return {
                     "access_token": str(access),
                     "refresh_token": str(refresh),

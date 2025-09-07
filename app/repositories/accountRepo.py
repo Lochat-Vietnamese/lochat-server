@@ -8,9 +8,9 @@ class AccountRepo:
     def all(page: int, page_size: int, is_active: bool | None):
         try:
             if is_active is None:
-                queryset = Account.objects.all().order_by("-created_at")
+                queryset = Account.objects.select_related("profile").all().order_by("-created_at")
             else:
-                queryset = Account.objects.filter(is_active=is_active).order_by("-created_at")
+                queryset = Account.objects.select_related("profile").filter(is_active=is_active).order_by("-created_at")
 
             paginator = Paginator(queryset, page_size)
             items = paginator.page(page)
@@ -27,8 +27,8 @@ class AccountRepo:
     def find_by_id(account_id: uuid.UUID, is_active: bool | None):
         try:
             if is_active is None:
-                return Account.objects.get(id=account_id)
-            return Account.objects.get(id=account_id, is_active=is_active)
+                return Account.objects.select_related("profile").get(id=account_id)
+            return Account.objects.select_related("profile").get(id=account_id, is_active=is_active)
         except Account.DoesNotExist:
             return None
 
@@ -36,8 +36,8 @@ class AccountRepo:
     def find_by_username(username: str, is_active: bool | None):
         try:
             if is_active is None:
-                return Account.objects.get(username=username)
-            return Account.objects.get(username=username, is_active=is_active)
+                return Account.objects.select_related("profile").get(username=username)
+            return Account.objects.select_related("profile").get(username=username, is_active=is_active)
         except Account.DoesNotExist:
             return None
 
@@ -45,8 +45,8 @@ class AccountRepo:
     def find_by_email(email: str, is_active: bool | None):
         try:
             if is_active is None:
-                return Account.objects.get(email=email)
-            return Account.objects.get(email=email, is_active=is_active)
+                return Account.objects.select_related("profile").get(email=email)
+            return Account.objects.select_related("profile").get(email=email, is_active=is_active)
         except Account.DoesNotExist:
             return None
 

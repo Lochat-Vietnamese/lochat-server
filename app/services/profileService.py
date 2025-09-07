@@ -45,7 +45,7 @@ class ProfileService:
         try:
             if phone_number and str(phone_number).strip():
                 return await sync_to_async(ProfileRepo.find_by_phone_number)(
-                    phone_number, is_active
+                    phone_number=phone_number, is_active=is_active
                 )
             return None
         except Exception as e:
@@ -57,7 +57,7 @@ class ProfileService:
             phone_number = str(data.get("phone_number"))
             nickname = str(data.get("nickname"))
             dob = data.get("dob")
-            if not all([phone_number, nickname, dob]) or await ProfileRepo.find_by_phone_number(phone_number=phone_number):
+            if not all([phone_number, nickname, dob]) or await ProfileService.get_by_phone_number(phone_number=phone_number, is_active=None):
                 return None
             return await sync_to_async(ProfileRepo.handle_create)(data)
         except Exception as e:
