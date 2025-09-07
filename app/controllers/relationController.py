@@ -1,8 +1,6 @@
 from django.views import View
 
 from app.mapping.relationMapping import RelationMapping
-from app.services.accountService import AccountService
-from app.mapping.accountMapping import AccountMapping
 from app.services.relationService import RelationService
 from app.utils.baseResponse import BaseResponse
 from app.utils.logHelper import LogHelper
