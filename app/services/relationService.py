@@ -2,8 +2,10 @@ import uuid
 from typing import Dict
 from asgiref.sync import sync_to_async
 
+from app.entities.relation import Relation
 from app.repositories.relationRepo import RelationRepo
 from app.services.profileService import ProfileService
+from app.utils.fieldsFilter import FieldsFilter
 
 
 class RelationService:
@@ -80,24 +82,22 @@ class RelationService:
             if existing:
                 return None
             
-            data.pop("first_user_id", None)
-            data.pop("second_user_id", None)
             data["first_user"] = first_user
             data["second_user"] = second_user
 
-            return await sync_to_async(RelationRepo.handle_create)(data)
+            return await sync_to_async(RelationRepo.handle_create)(FieldsFilter(data=data, entity=Relation))
         except Exception as e:
             raise e
 
     @staticmethod
     async def update(data: Dict):
         try:
-            relation_id = data.get("relation_id")
+            relation_id = data.get("id")
             if relation_id and str(relation_id).strip() and any(data.values()):
                 relation = await RelationService.get_by_id(relation_id, None)
                 if not relation:
                     return None
-                return await sync_to_async(RelationRepo.handle_update)(relation, data)
+                return await sync_to_async(RelationRepo.handle_update)(relation, FieldsFilter(data=data, entity=Relation))
             return None
         except Exception as e:
             raise e

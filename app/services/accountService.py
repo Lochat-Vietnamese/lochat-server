@@ -70,18 +70,19 @@ class AccountService:
             if await sync_to_async(AccountRepo.find_by_email)(email, None):
                 return None
 
-            return await sync_to_async(AccountRepo.handle_create)(data)
+            return await sync_to_async(AccountRepo.handle_create)(FieldsFilter(data=data, entity=Account))
         except Exception as e:
             raise e
 
     @staticmethod
-    async def update(account_id: str, data: Dict):
+    async def update(data: Dict):
         try:
+            account_id = data.get("id")
             if account_id and str(account_id).strip() and any(data.values()):
                 account = await AccountService.get_by_id(account_id, None)
                 if not account:
                     return None
-                return await sync_to_async(AccountRepo.handle_update)(account, data)
+                return await sync_to_async(AccountRepo.handle_update)(account, FieldsFilter(data=data, entity=Account))
             return None
         except Exception as e:
             raise e
@@ -154,14 +155,14 @@ class AccountService:
                 phone_number=phone_number, is_active=None
             )
             if not profile:
-                profile = await ProfileService.create(FieldsFilter(data=data, entity=Profile))
+                profile = await ProfileService.create(data=data)
 
             existingUsername = await AccountService.get_by_username(username, None)
             existingEmail = await AccountService.get_by_email(email, None)
             if not existingUsername and not existingEmail:
                 data["password"] = make_password(password)
                 data["profile"] = profile
-                return await AccountService.create(FieldsFilter(data=data, entity=Account))
+                return await AccountService.create(data=data)
             else:
                 return None
 

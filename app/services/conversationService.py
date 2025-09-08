@@ -1,6 +1,7 @@
 import uuid
 from typing import Dict
 from django.utils.timezone import datetime, now
+from app.entities.conversation import Conversation
 from app.repositories.conversationRepo import ConversationRepo
 from app.services.accountService import AccountService
 from asgiref.sync import sync_to_async
@@ -48,7 +49,7 @@ class ConversationService:
             creator = await AccountService.get_by_id(creator_id, True)
 
             data["creator"] = creator
-            return await sync_to_async(ConversationRepo.handle_create)(FieldsFilter(data, ConversationRepo))
+            return await sync_to_async(ConversationRepo.handle_create)(FieldsFilter(data=data, entity=Conversation))
         except Exception as e:
             raise e
 
@@ -60,7 +61,7 @@ class ConversationService:
                 conversation = await ConversationService.get_by_id(conversation_id, None)
                 if not conversation:
                     return None
-                return await sync_to_async(ConversationRepo.handle_update)(conversation, FieldsFilter(data, ConversationRepo))
+                return await sync_to_async(ConversationRepo.handle_update)(conversation, FieldsFilter(data=data, entity=Conversation))
             return None
         except Exception as e:
             raise e

@@ -1,8 +1,10 @@
+from profile import Profile
 import uuid
 from typing import Dict
 from asgiref.sync import sync_to_async
 
 from app.repositories.profileRepo import ProfileRepo
+from app.utils.fieldsFilter import FieldsFilter
 
 
 class ProfileService:
@@ -59,18 +61,19 @@ class ProfileService:
             dob = data.get("dob")
             if not all([phone_number, nickname, dob]) or await ProfileService.get_by_phone_number(phone_number=phone_number, is_active=None):
                 return None
-            return await sync_to_async(ProfileRepo.handle_create)(data)
+            return await sync_to_async(ProfileRepo.handle_create)(FieldsFilter(data=data, entity=Profile))
         except Exception as e:
             raise e
 
     @staticmethod
-    async def update(profile_id: str, data: Dict):
+    async def update(data: Dict):
         try:
+            profile_id = data.get("id")
             if profile_id and str(profile_id).strip() and any(data.values()):
                 profile = await ProfileService.get_by_id(profile_id, None)
                 if not profile:
                     return None
-                return await sync_to_async(ProfileRepo.handle_update)(profile, data)
+                return await sync_to_async(ProfileRepo.handle_update)(profile, FieldsFilter(data=data, entity=Profile))
             return None
         except Exception as e:
             raise e

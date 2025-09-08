@@ -62,7 +62,7 @@ class RelationController(View):
                 return BaseResponse.error()
 
             if action == "update":
-                relation_id = data.get("relation_id")
+                relation_id = data.get("id")
                 if relation_id:
                     result = await RelationService.update(data)
                     if result:
