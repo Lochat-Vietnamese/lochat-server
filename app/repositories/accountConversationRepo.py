@@ -1,12 +1,12 @@
 import uuid
-from django.utils.timezone import datetime, now
+from django.utils.timezone import now
 from app.entities.accountConversation import AccountConversation
 from app.entities.account import Account
 from app.entities.conversation import Conversation
 from django.core.paginator import Paginator
 
 
-class AccountsConversationsRepo:
+class AccountConversationRepo:
     @staticmethod
     def all(page: int, page_size: int, is_active: bool | None):
         try:
