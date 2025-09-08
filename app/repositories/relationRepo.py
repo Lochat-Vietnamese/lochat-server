@@ -26,8 +26,8 @@ class RelationRepo:
                 "current": items.number,
                 "content": list(items),
             }
-        except Exception:
-            return None
+        except Exception as e:
+            raise e
 
     @staticmethod
     def find_by_id(relation_id: uuid.UUID, is_active: bool | None):
@@ -40,6 +40,8 @@ class RelationRepo:
                 )
         except Relation.DoesNotExist:
             return None
+        except Exception as e:
+            raise e
 
     @staticmethod
     def find_by_both_users(user1: Profile, user2: Profile, is_active: bool | None):
@@ -57,6 +59,8 @@ class RelationRepo:
                 )
         except Relation.DoesNotExist:
             return None
+        except Exception as e:
+            raise e
 
     @staticmethod
     def find_by_one_user(user: Profile, page: int, page_size: int, is_active: bool | None):
@@ -79,15 +83,15 @@ class RelationRepo:
                 "current": items.number,
                 "content": list(items),
             }
-        except Exception:
-            return None
+        except Exception as e:
+            raise e
 
     @staticmethod
     def handle_create(data: dict):
         try:
             return Relation.objects.create(**data)
-        except Exception:
-            return None
+        except Exception as e:
+            raise e
 
     @staticmethod
     def handle_update(relation: Relation, data: dict):
@@ -96,8 +100,8 @@ class RelationRepo:
                 setattr(relation, field, value)
             relation.save(update_fields=list(data.keys()))
             return relation
-        except Exception:
-            return None
+        except Exception as e:
+            raise e
 
     @staticmethod
     def handle_delete(relation: Relation):
@@ -105,13 +109,13 @@ class RelationRepo:
             relation.is_active = False
             relation.save(update_fields=["is_active"])
             return relation
-        except Exception:
-            return None
+        except Exception as e:
+            raise e
 
     @staticmethod
     def handle_hard_delete(relation: Relation):
         try:
             relation.delete()
             return True
-        except Exception:
-            return None
+        except Exception as e:
+            raise e

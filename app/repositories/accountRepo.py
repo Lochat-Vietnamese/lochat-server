@@ -20,8 +20,6 @@ class AccountRepo:
                 "current": items.number,
                 "content": list(items),
             }
-        except Account.DoesNotExist:
-             return None
         except Exception as e:
             raise e
 
