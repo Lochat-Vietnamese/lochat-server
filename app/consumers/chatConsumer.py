@@ -183,20 +183,3 @@
 #                 )
 #             except:
 #                 pass
-
-#     # async def load_chat_history(self, conversation_id):
-#     #     ACs = await sync_to_async(AccountsConversationsService.find_by_conversation)(str(conversation_id))
-#     #     messages = await sync_to_async(MessagesService.find_by_sender)()
-#     #     for acc in accounts:
-#     #         await self.send(
-#     #             json.dumps(
-#     #                 {
-#     #                     "message": (f"room id: {self._room_id}"+
-#     #                         f"Đã kết nối với {acc.nickname}"
-#     #                         if acc != self.scope["user"]
-#     #                         else "Đã kết nối"
-#     #                     )
-#     #                 },
-#     #                 ensure_ascii=False,
-#     #             )
-#     #         )

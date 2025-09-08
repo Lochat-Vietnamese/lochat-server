@@ -6,13 +6,15 @@ class RedisClient:
     _instance = None
     def __init__(self):
         cfg = settings.REDIS_CONFIG
-        self.client = redis.Redis(
+        self.pool = redis.ConnectionPool(
             host=cfg["HOST"],
             port=cfg["PORT"],
             db=cfg["DB"],
             password=cfg["PASSWORD"],
-            decode_responses=cfg["DECODE_RESPONSES"]
+            decode_responses=cfg["DECODE_RESPONSES"],
+            max_connections=20
         )
+        self.client = redis.Redis(connection_pool=self.pool)
 
     @classmethod
     async def instance(cls):
