@@ -4,8 +4,8 @@ import time
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from app.mapping.accountMapping import AccountMapping
-from app.mapping.mediasMapping import MediaMapping
-from app.mapping.messagesMapping import MessageMapping
+from app.mapping.mediaMapping import MediaMapping
+from app.mapping.messageMapping import MessageMapping
 from app.utils.redisClient import RedisClient
 from app.services.messagesService import MessageService
 from app.enums.messageTypes import MessageTypes
