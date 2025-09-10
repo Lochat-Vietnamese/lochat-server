@@ -1,9 +1,8 @@
 import uuid
 from typing import Dict
-from django.utils.timezone import datetime, now
 from app.entities.conversation import Conversation
 from app.repositories.conversationRepo import ConversationRepo
-from app.services.accountService import AccountService
+from app.services.profileService import ProfileService
 from asgiref.sync import sync_to_async
 
 from app.utils.fieldsFilter import FieldsFilter
@@ -46,7 +45,7 @@ class ConversationService:
             creator_id = data.get("creator_id")
             if not creator_id or not str(creator_id).strip():
                 return None
-            creator = await AccountService.get_by_id(creator_id, True)
+            creator = await ProfileService.get_by_id(profile_id=creator_id, is_active=True)
 
             data["creator"] = creator
             return await sync_to_async(ConversationRepo.handle_create)(FieldsFilter(data=data, entity=Conversation))

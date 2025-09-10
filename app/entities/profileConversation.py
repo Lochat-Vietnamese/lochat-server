@@ -1,13 +1,13 @@
 import uuid
 from django.db import models
 from django.utils.timezone import now
-from app.entities.account import Account
+from app.entities.profile import Profile
 from app.entities.conversation import Conversation
 
-class AccountConversation(models.Model):
+class ProfileConversation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='accountConversation_account')
-    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='accountConversation_conversation')
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='profileConversation_profile')
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='profileConversation_conversation')
     last_accessed = models.DateTimeField(default=now)
     conversation_name = models.TextField(max_length=255)
     is_active = models.BooleanField(default=True)
@@ -17,7 +17,7 @@ class AccountConversation(models.Model):
 
     class Meta:
         app_label = "app"
-        unique_together = ('account', 'conversation')
+        unique_together = ('profile', 'conversation')
         indexes = [
             models.Index(fields=['last_accessed']),
         ]

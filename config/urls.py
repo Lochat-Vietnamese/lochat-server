@@ -17,7 +17,9 @@ Including another URLconf
 from django.urls import path
 from app.controllers.accountController import AccountController
 from app.controllers.authController import AuthController
+from app.controllers.conversationsController import ConversationController
 from app.controllers.profileController import ProfileController
+from app.controllers.profileConversationController import ProfileConversationController
 from app.controllers.relationController import RelationController; 
 
 urlpatterns = [
@@ -25,4 +27,6 @@ urlpatterns = [
     path('account/<str:action>', AccountController.as_view(), name='account_action'),
     path('profile/<str:action>', ProfileController.as_view(), name='profile_action'),
     path('relation/<str:action>', RelationController.as_view(), name='relation_action'),
+    path('conversation/<str:action>', ConversationController.as_view(), name='conversation_action'),
+    path('profile-conversation/<str:action>', ProfileConversationController.as_view(), name='profile_conversation_action'),
 ]

@@ -1,5 +1,5 @@
 import uuid
-from app.entities.account import Account
+from app.entities.profile import Profile
 from app.entities.conversation import Conversation
 from django.core.paginator import Paginator
 
@@ -57,7 +57,7 @@ class ConversationRepo:
             raise e
     
     @staticmethod
-    def find_by_type(type: ConversationTypes.choices ,page:int, page_size: int, is_active: bool | None):
+    def find_by_type(type: ConversationTypes, page:int, page_size: int, is_active: bool | None):
         try:
             if is_active is None:
                 queryset = Conversation.objects.select_related("creator").filter(type=type).order_by("-created_at")
@@ -76,7 +76,7 @@ class ConversationRepo:
             raise e
         
     @staticmethod
-    def find_by_creator(creator: Account, is_active: bool | None):
+    def find_by_creator(creator: Profile, is_active: bool | None):
         try:
             if is_active is None:
                 return Conversation.objects.select_related("creator").get(creator=creator)
