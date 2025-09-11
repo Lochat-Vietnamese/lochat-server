@@ -10,5 +10,5 @@ django-redis
 cryptography
 pycryptodome
 daphne
-boto3
+aioboto3
 starlette

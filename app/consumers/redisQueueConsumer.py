@@ -9,7 +9,7 @@ from app.mapping.messageMapping import MessageMapping
 from app.utils.redisClient import RedisClient
 from app.services.messagesService import MessageService
 from app.enums.messageTypes import MessageTypes
-from app.services.mediasService import MediaService
+from app.services.mediaService import MediaService
 
 
 class RedisQueueConsumer(threading.Thread):

@@ -11,7 +11,7 @@ class RequestData:
         elif "multipart/form-data" in content_type or "application/x-www-form-urlencoded" in content_type:
             data = request.POST.dict()
             if request.FILES:
-                data.update({key: value for key, value in request.FILES.items()})
+                data["files"] = [f for _, files in request.FILES.lists() for f in files]
         else:
             data = {}
         return data

@@ -1,7 +1,6 @@
 import uuid
 from typing import Dict
 from app.entities.account import Account
-from app.entities.profile import Profile
 from app.repositories.accountRepo import AccountRepo
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import check_password, make_password
