@@ -12,7 +12,8 @@ class ProfileService:
     async def get_all(page=1, page_size=20, is_active: bool | None = True):
         try:
             if page <= 0 or page_size <= 0:
-                return None
+                page = 1
+                page_size = 20
             return await sync_to_async(ProfileRepo.all)(
                 page=page, page_size=page_size, is_active=is_active
             )
@@ -34,7 +35,10 @@ class ProfileService:
         nickname: str, page=1, page_size=20, is_active: bool | None = True
     ):
         try:
-            if not nickname or page <= 0 or page_size <= 0:
+            if page <= 0 or page_size <= 0:
+                page = 1
+                page_size = 20
+            if not nickname: 
                 return None
             return await sync_to_async(ProfileRepo.find_by_nickname)(
                 nickname, page, page_size, is_active

@@ -2,7 +2,6 @@ import uuid
 from typing import Dict
 from django.forms import Media
 from app.repositories.mediaRepo import MediaRepo
-from app.services.accountService import AccountService
 from app.enums.mediaTypes import MediaTypes
 import aioboto3
 from django.conf import settings
@@ -17,7 +16,8 @@ class MediaService:
     async def get_all(page=1, page_size=20, is_active: bool | None = True):
         try:
             if page <= 0 or page_size <= 0:
-                return None
+                page = 1
+                page_size = 20
             return await sync_to_async(MediaRepo.all)(
                 page=page, page_size=page_size, is_active=is_active
             )
@@ -37,6 +37,9 @@ class MediaService:
     @staticmethod
     async def get_by_uploader(profile_conversation_id: str, page: int = 1, page_size: int = 20, is_active: bool | None = True):
         try:
+            if page <= 0 or page_size <= 0:
+                page = 1
+                page_size = 20
             if profile_conversation_id and str(profile_conversation_id).strip():
                 profileConversation = await ProfileConversationService.get_by_id(profile_conversation_id, is_active)
                 if profileConversation:
@@ -48,6 +51,9 @@ class MediaService:
     @staticmethod
     async def get_by_type(media_type: str, page: int = 1, page_size: int = 20, is_active: bool | None = True):
         try:
+            if page <= 0 or page_size <= 0:
+                page = 1
+                page_size = 20
             if media_type and str(media_type).strip():
                 return await sync_to_async(MediaRepo.find_by_type)(MediaTypes(media_type), page=page, page_size=page_size, is_active=is_active, is_active=is_active)
             return None
@@ -90,7 +96,7 @@ class MediaService:
                 media = await MediaService.get_by_id(media_id=media_id, is_active=None)
                 if not media:
                     return None
-                return await sync_to_async(MediaRepo.handle_update)(media, data)
+                return await sync_to_async(MediaRepo.handle_update)(media, FieldsFilter(data=data, entity=Media))
             return None
         except Exception as e:
             raise e
@@ -199,5 +205,5 @@ class MediaService:
 
                     result.append(media)
             return result
-        except Exception:
-            return None
+        except Exception as e:
+            raise e

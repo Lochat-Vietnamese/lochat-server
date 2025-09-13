@@ -13,7 +13,8 @@ class RelationService:
     async def get_all(page=1, page_size=20, is_active: bool | None = True):
         try:
             if page <= 0 or page_size <= 0:
-                return None
+                page = 1
+                page_size = 20
             return await sync_to_async(RelationRepo.all)(page=page, page_size=page_size, is_active=is_active)
         except Exception as e:
             raise e
@@ -47,6 +48,9 @@ class RelationService:
     @staticmethod
     async def get_by_one_user(user_id: str, page=1, page_size=20, is_active: bool | None = True):
         try:
+            if page <= 0 or page_size <= 0:
+                page = 1
+                page_size = 20
             if not user_id:
                 return None
             user = await ProfileService.get_by_id(user_id)

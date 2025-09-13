@@ -16,7 +16,8 @@ class ProfileConversationService:
     async def get_all(page=1, page_size=20, is_active: bool | None = True):
         try:
             if page <= 0 or page_size <= 0:
-                return None
+                page = 1
+                page_size = 20
             return await sync_to_async(ProfileConversationRepo.all)(
                 page=page, page_size=page_size, is_active=is_active
             )
@@ -43,6 +44,9 @@ class ProfileConversationService:
         is_active: bool | None = True,
     ):
         try:
+            if page <= 0 or page_size <= 0:
+                page = 1
+                page_size = 20
             if account_id and str(account_id).strip():
                 account = await AccountService.get_by_id(account_id=account_id)
                 profile = account.profile if account else None
@@ -65,6 +69,9 @@ class ProfileConversationService:
         is_active: bool | None = True,
     ):
         try:
+            if page <= 0 or page_size <= 0:
+                page = 1
+                page_size = 20
             if conversation_id and str(conversation_id).strip():
                 conversation = await ConversationService.get_by_id(conversation_id)
                 if conversation:
