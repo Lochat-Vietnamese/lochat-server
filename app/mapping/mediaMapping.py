@@ -3,7 +3,7 @@ from app.entities.media import Media
 from app.mapping.profileConversationMapping import ProfileConversationMapping
 
 
-class MediasMapping(serializers.ModelSerializer):
+class MediaMapping(serializers.ModelSerializer):
     uploader = ProfileConversationMapping(read_only=True)
 
     class Meta:
