@@ -24,7 +24,7 @@ class ProfileController(View):
                     return BaseResponse.success(data=result)
                 return BaseResponse.error(message="process_failed")
             
-            if action == "find-by-id":
+            if action == "get-by-id":
                 profile_id = data.get("profile_id", None)
                 is_active = ParseBool(data.get("is_active", "True"))
                 if profile_id:

@@ -13,7 +13,7 @@ class ConversationController(View):
             data = RequestData(request=request)
 
 
-            if action == "find-by-id":
+            if action == "get-by-id":
                 id = data.get("conversation_id")
                 is_active = ParseBool(data.get("is_active", "true"))
                 if id:

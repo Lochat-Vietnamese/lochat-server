@@ -13,7 +13,7 @@ class RelationController(View):
             data = RequestData(request=request)
                 
 
-            if action == "find-by-id":
+            if action == "get-by-id":
                 relation_id = data.get("relation_id")
                 is_active = ParseBool(data.get("is_active", "True"))
 
@@ -24,7 +24,7 @@ class RelationController(View):
                     return BaseResponse.error(message="process_failed")
                 return BaseResponse.error()
 
-            if action == "find-by-both-users":
+            if action == "get-by-both-users":
                 user1_id = data.get("first_user_id")
                 user2_id = data.get("second_user_id")
                 is_active = ParseBool(data.get("is_active", "True"))
@@ -36,7 +36,7 @@ class RelationController(View):
                     return BaseResponse.error(message="process_failed")
                 return BaseResponse.error()
 
-            if action == "find-by-user":
+            if action == "get-by-user":
                 user_id = data.get("user_id")
                 page = int(data.get("page", "1"))
                 page_size = int(data.get("page_size", "20"))
@@ -70,7 +70,7 @@ class RelationController(View):
                     return BaseResponse.error(message="process_failed")
                 return BaseResponse.error()
 
-            if action == "delete":
+            if action == "block":
                 relation_id = data.get("relation_id")
                 if relation_id:
                     result = await RelationService.delete(relation_id)

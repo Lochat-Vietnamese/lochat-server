@@ -1,7 +1,6 @@
 from django.views import View
 
 from app.mapping.profileConversationMapping import ProfileConversationMapping
-from app.services.conversationService import ConversationService
 from app.services.profileConversationService import ProfileConversationService
 from app.utils.baseResponse import BaseResponse
 from app.utils.logHelper import LogHelper
