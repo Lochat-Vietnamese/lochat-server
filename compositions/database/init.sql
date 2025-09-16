@@ -1,1 +1,1 @@
-CREATE DATABASE securitychat;
+CREATE DATABASE lochat;

@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  database:
+  lochatdb:
     image: postgres:15
     container_name: postgres_container
     restart: always
@@ -19,12 +19,12 @@ services:
     container_name: pgadmin_container
     restart: always
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@e2ee.com
+      PGADMIN_DEFAULT_EMAIL: admin@lochat.com
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
       - "5050:80"
     depends_on:
-      - database
+      - lochatdb
 
   app:
     build:
@@ -34,7 +34,7 @@ services:
     env_file:
       - .env
     depends_on:
-      - database
+      - lochatdb
     ports:
       - "8080:8080"
 
@@ -45,7 +45,7 @@ services:
     env_file:
       - .env
     depends_on:
-      - database
+      - lochatdb
     ports:
       - "6379:6379"
     volumes:

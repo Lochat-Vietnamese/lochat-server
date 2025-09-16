@@ -1,4 +1,4 @@
-Django
+Django>=3.1
 djangorestframework
 djangorestframework-simplejwt
 django-cors-headers
@@ -10,5 +10,5 @@ django-redis
 cryptography
 pycryptodome
 daphne
-boto3
+aioboto3
 starlette

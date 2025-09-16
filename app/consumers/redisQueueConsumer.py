@@ -3,13 +3,14 @@ import json
 import time
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
-from app.mapping.accountsMapping import AccountsMapping
-from app.mapping.mediasMapping import MediasMapping
-from app.mapping.messagesMapping import MessagesMapping
+from app.mapping.mediaMapping import MediaMapping
+from app.mapping.messageMapping import MessageMapping
+from app.mapping.profileMapping import ProfileMapping
+from app.utils.logHelper import LogHelper
 from app.utils.redisClient import RedisClient
-from app.services.messagesService import MessagesService
+from app.services.messageService import MessageService
 from app.enums.messageTypes import MessageTypes
-from app.services.mediasService import MediasService
+from app.services.mediaService import MediaService
 
 
 class RedisQueueConsumer(threading.Thread):
@@ -17,7 +18,8 @@ class RedisQueueConsumer(threading.Thread):
         super().__init__(daemon=True)
         self.queue_key = queue_key
         self.running = True
-        self.redis = RedisClient.instance().client
+        redis_instance = async_to_sync(RedisClient.instance)()
+        self.redis = redis_instance.client
 
     def run(self):
         while self.running:
@@ -27,60 +29,56 @@ class RedisQueueConsumer(threading.Thread):
                     _, data_str = result
                     data = json.loads(data_str)
                     if data.get("type") == MessageTypes.TEXT:
-                        self.text_message_handler(data)
-                    else:
-                        self.media_message_handler(data)
-            except Exception:
+                        async_to_sync(self.text_message_handler)(data)
+                    elif data.get("type") == MessageTypes.MEDIA:
+                        async_to_sync(self.media_message_handler)(data)
+            except Exception as e:
+                LogHelper.error(message=str(e))
                 time.sleep(1)
+                
+    def stop(self):
+        self.running = False
 
-    def text_message_handler(self, data):
+
+    async def text_message_handler(self, data):
         try:
-            result = MessagesService.create(data)
+            result = await MessageService.create(data=data)
 
             if result:
                 channel_layer = get_channel_layer()
-                async_to_sync(channel_layer.group_send)(
+                await channel_layer.group_send(
                     str(result.conversation.id),
                     {
                         "type": MessageTypes.TEXT,
-                        "content": json.loads(json.dumps(MessagesMapping(result).data, default=str)),
-                        "sender": json.loads(json.dumps(AccountsMapping(result.sender_relation.get_account).data, default=str)),
-                        "reply_to": str(result.reply_to) if result.reply_to else None
+                        "content": json.loads(json.dumps(MessageMapping(result).data, default=str)),
+                        "sender": json.loads(json.dumps(ProfileMapping(result.sender.profile).data, default=str)),
+                        "reply": str(result.reply) if result.reply else None
                     },
                 )
-        except Exception:
-            pass
+        except Exception as e:
+            LogHelper.error(message=str(e))
 
-    def media_message_handler(self, data):
+    async def media_message_handler(self, data):
         try:
-            media_data = {
-                "uploader_id": data.get("sender_relation_id"),
-                "name": data.get("media_name"),
-                "type": data.get("media_type"),
-                "size": data.get("media_size"),
-                "url": data.get("media_url"),
-            }
-            media_created = MediasService.create(media_data)
+            media_created = await MediaService.create(data=data)
+
             if media_created:
                 data["media_id"] = media_created.id
-                result = MessagesService.create(data)
+                result = await MessageService.create(data=data)
 
                 if result:
                     channel_layer = get_channel_layer()
-                    async_to_sync(channel_layer.group_send)(
+                    await channel_layer.group_send(
                         str(result.conversation.id),
                         {
                             "type": MessageTypes.MEDIA,
-                            "content": json.loads(json.dumps(MessagesMapping(result).data, default=str)),
-                            "sender": json.loads(json.dumps(AccountsMapping(result.sender_relation.get_account).data, default=str)),
-                            "media": json.loads(json.dumps(MediasMapping(result.media).data, default=str)),
-                            "reply_to": (
-                                str(result.reply_to) if result.reply_to else None
+                            "content": json.loads(json.dumps(MessageMapping(result).data, default=str)),
+                            "sender": json.loads(json.dumps(ProfileMapping(result.sender.profile).data, default=str)),
+                            "media": json.loads(json.dumps(MediaMapping(result.media).data, default=str)),
+                            "reply": (
+                                str(result.reply) if result.reply else None
                             ),
                         },
                     )
-        except Exception:
-            pass
-
-    def stop(self):
-        self.running = False
+        except Exception as e:
+            LogHelper.error(message=str(e))

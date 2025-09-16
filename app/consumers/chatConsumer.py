@@ -1,71 +1,51 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 import json
-from app.services.accountsConversationsService import AccountsConversationsService
-from app.services.conversationsService import ConversationsService
+from app.enums.conversationTypes import ConversationTypes
+from app.services.profileConversationService import ProfileConversationService
+from app.services.conversationService import ConversationService
 from django.contrib.auth.models import AnonymousUser
-from app.services.accountsService import AccountsService
+from app.services.accountService import AccountService
 from app.enums.messageTypes import MessageTypes
+from app.utils.logHelper import LogHelper
 from app.utils.redisClient import RedisClient
-from asgiref.sync import sync_to_async
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
     _room_id = None
     _current_user = None
     _current_sender_relation = None
+    _redis_instance = None
 
-    async def exception_send(self, exception=""):
+    async def exception_send(self):
         await self.send(
             text_data=json.dumps(
-                {"error": "Dữ liệu gửi lên không hợp lệ", "detail": str(exception)},
+                {"message": "invalid_data", "data": None},
                 ensure_ascii=False,
             )
         )
 
-    async def connect_room(self, conversation, *accounts):
+    async def connect_room(self, conversation, *profiles):
+        self._redis_instance = await RedisClient.instance()
         self._room_id = str(conversation.id)
-        self._current_sender_relation = await sync_to_async(
-            AccountsConversationsService.find_by_account_and_conversation
-        )({"conversation_id": self._room_id, "account_id": self._current_user.id})
+        self._current_sender_relation = await ProfileConversationService.get_by_both(
+            conversation_id=self._room_id,
+            profile_id=self._current_user.id,
+            is_active=True,
+        )
+
         await self.channel_layer.group_add(self._room_id, self.channel_name)
         await self.accept()
-        for acc in accounts:
+        
+        for profile in profiles:
             await self.send(
                 json.dumps(
                     {
-                        "message": (
-                            f"room id: {self._room_id}"
-                            + f"Đã kết nối với {acc.nickname}"
-                            if acc != self.scope["user"]
-                            else "Đã kết nối"
-                        )
+                        "message": "connected",
+                        "data": self._room_id                        
                     },
                     ensure_ascii=False,
                 )
             )
-
-    async def text(self, event):
-        await self.send(
-            text_data=json.dumps(
-                {
-                    "content": event["content"],
-                    "sender": event["sender"],
-                },
-                ensure_ascii=False,
-            )
-        )
-
-    async def media(self, event):
-        await self.send(
-            text_data=json.dumps(
-                {
-                    "content": event["content"],
-                    "sender": event["sender"],
-                    "media": event["media"],
-                },
-                ensure_ascii=False,
-            )
-        )
 
     async def connect(self):
         try:
@@ -79,29 +59,34 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 )
                 await self.close()
             else:
-                represent_conversation = await sync_to_async(
-                    ConversationsService.find_by_id
-                )(id)
+                represent_conversation = await ConversationService.get_by_id(
+                    conversation_id=id
+                )
                 if not represent_conversation:
-                    friend = await sync_to_async(AccountsService.find_by_id)(id)
+                    friend = await AccountService.get_by_id(account_id=id)
                     if friend:
-                        common_conversation = await sync_to_async(
-                            AccountsConversationsService.find_common_conversation
-                        )(self._current_user.id, id)
+                        common_conversation = (
+                            await ProfileConversationService.get_common_conversations(
+                                acc1_id=self._current_user.id,
+                                acc2_id=id,
+                                is_active=True,
+                                type=ConversationTypes.PRIVATE,
+                            )
+                        )
                         if not common_conversation:
-                            new_conversation = await sync_to_async(
-                                ConversationsService.create
-                            )({})
-                            await sync_to_async(AccountsConversationsService.create)(
+                            new_conversation = await ConversationService.create(
+                                {"creator_id": str(self._current_user.id)}
+                            )
+                            await ProfileConversationService.create(
                                 {
-                                    "account": str(self._current_user.id),
-                                    "conversation": str(new_conversation.id),
+                                    "profile_id": str(self._current_user.id),
+                                    "conversation_id": str(new_conversation.id),
                                 }
                             )
-                            await sync_to_async(AccountsConversationsService.create)(
+                            await ProfileConversationService.create(
                                 {
-                                    "account": str(friend.id),
-                                    "conversation": str(new_conversation.id),
+                                    "profile_id": str(friend.id),
+                                    "conversation_id": str(new_conversation.id),
                                 }
                             )
                             await self.connect_room(
@@ -115,55 +100,89 @@ class ChatConsumer(AsyncWebsocketConsumer):
                         await self.accept()
                         await self.send(
                             json.dumps(
-                                {
-                                    "message": f"Không tìm thấy tài khoản hoặc đoạn chat {id}"
-                                },
+                                {"message": "not_found", "data": None},
                                 ensure_ascii=False,
                             )
                         )
                 else:
                     await self.connect_room(represent_conversation, self._current_user)
-        except Exception as e:
+        except Exception:
             await self.accept()
             await self.send(
                 json.dumps(
-                    {"error": "Lỗi trong quá trình kết nối", "detail": str(e)},
+                    {"message": "connection_error", "data": None},
                     ensure_ascii=False,
                 )
             )
+            LogHelper.error(message=str(Exception))
+
+    async def text(self, event):
+        await self.send(
+            text_data=json.dumps(
+                {
+                    "message": "success",
+                    "data": {
+                        "content": event["content"],
+                        "sender": event["sender"],
+                        "reply": event["reply"]
+                    },
+                },
+                ensure_ascii=False
+            )
+        )
+
+    async def media(self, event):
+        await self.send(
+            text_data=json.dumps(
+                {
+                    "message": "success",
+                    "data": {
+                        "content": event["content"],
+                        "sender": event["sender"],
+                        "media": event["media"],
+                        "reply": event["reply"]
+                    },
+                },
+                ensure_ascii=False,
+            )
+        )
 
     async def receive(self, text_data):
         try:
             received = json.loads(text_data)
             type = received.get("type", "text")
             data = received.get("content", "")
-            reply = received.get("reply_to", None)
+            reply = received.get("reply", None)
+
             if type in MessageTypes.values:
                 if type == MessageTypes.MEDIA:
                     name = received.get("name", None)
                     media_type = received.get("media_type", None)
                     size = received.get("size", None)
                     url = received.get("url", None)
+
                     message_data = {
-                        "sender_relation_id": str(self._current_sender_relation.id),
+                        "sender_id": str(self._current_sender_relation.id),
+                        "conversation_id": str(self._room_id),
                         "type": type,
                         "content": str(data),
-                        "media_name": name,
-                        "media_type": media_type,
-                        "media_size": size,
-                        "media_url": url,
+                        "name": name,
+                        "type": media_type,
+                        "size": size,
+                        "url": url,
                     }
                 else:
                     message_data = {
-                        "sender_relation_id": str(self._current_sender_relation.id),
+                        "sender_id": str(self._current_sender_relation.id),
+                        "conversation_id": str(self._room_id),
                         "type": type,
                         "content": str(data),
                     }
+
                 if reply and str(reply).strip():
-                    message_data["reply_to"] = str(reply)
-                await sync_to_async(RedisClient.instance().queue_add)(
-                    "message_queue", message_data
-                )
+                    message_data["reply"] = str(reply)
+                    
+                await self._redis_instance.queue_add("message_queue", message_data)
             else:
                 await self.exception_send()
         except Exception as e:
@@ -173,30 +192,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
         try:
             if self._room_id:
                 await self.channel_layer.group_discard(self._room_id, self.channel_name)
-        except Exception as e:
+        except Exception:
             try:
                 await self.send(
                     json.dumps(
-                        {"error": "Lỗi trong quá trình ngắt kết nối", "detail": str(e)},
+                        {"message": "connection_error", "data": None},
                         ensure_ascii=False,
                     )
                 )
-            except:
-                pass
-
-    # async def load_chat_history(self, conversation_id):
-    #     ACs = await sync_to_async(AccountsConversationsService.find_by_conversation)(str(conversation_id))
-    #     messages = await sync_to_async(MessagesService.find_by_sender)()
-    #     for acc in accounts:
-    #         await self.send(
-    #             json.dumps(
-    #                 {
-    #                     "message": (f"room id: {self._room_id}"+
-    #                         f"Đã kết nối với {acc.nickname}"
-    #                         if acc != self.scope["user"]
-    #                         else "Đã kết nối"
-    #                     )
-    #                 },
-    #                 ensure_ascii=False,
-    #             )
-    #         )
+            except Exception as e:
+                raise e
+            LogHelper.error(message=str(Exception))

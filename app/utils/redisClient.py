@@ -6,36 +6,38 @@ class RedisClient:
     _instance = None
     def __init__(self):
         cfg = settings.REDIS_CONFIG
-        self.client = redis.Redis(
+        self.pool = redis.ConnectionPool(
             host=cfg["HOST"],
             port=cfg["PORT"],
             db=cfg["DB"],
             password=cfg["PASSWORD"],
-            decode_responses=cfg["DECODE_RESPONSES"]
+            decode_responses=cfg["DECODE_RESPONSES"],
+            max_connections=20
         )
+        self.client = redis.Redis(connection_pool=self.pool)
 
     @classmethod
-    def instance(cls):
+    async def instance(cls):
         if cls._instance is None:
             cls._instance = cls()
         return cls._instance
 
-    def add(self, key: str, value: str, expire_sec: int = None):
+    async def add(self, key: str, value: str, expire_sec: int = None):
         if expire_sec:
             self.client.setex(key, expire_sec, value)
         else:
             self.client.set(key, value)
 
-    def get(self, key: str):
+    async def get(self, key: str):
         return self.client.get(key)
     
-    def delete(self, key: str):
+    async def delete(self, key: str):
         return self.client.delete(key)
 
-    def exists(self, key: str):
+    async def exists(self, key: str):
         return self.client.exists(key)
     
-    def get_all(self):
+    async def get_all(self):
         result = []
         keys = self.client.keys("*")
         for key in keys:
@@ -45,5 +47,5 @@ class RedisClient:
             result.append(couple)
         return result
     
-    def queue_add(self, queue_key: str, value: dict):
+    async def queue_add(self, queue_key: str, value: dict):
         self.client.rpush(queue_key, json.dumps(value))

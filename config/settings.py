@@ -85,10 +85,10 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "securitychat",
+        "NAME": "lochat",
         "USER": "admin",
         "PASSWORD": "admin",
-        "HOST": "database",
+        "HOST": "lochatdb",
         "PORT": "5432",
     }
 }
@@ -167,7 +167,7 @@ REDIS_CONFIG = {
 
 PUBLIC_ENDPOINTS = [
     '/login',
-    '/registry',
+    '/sign-up',
     '/restock-token',
 ]
 
