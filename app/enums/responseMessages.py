@@ -10,3 +10,7 @@ class ResponseMessages(str, Enum):
     SUCCESS = "success"
     INVALID_ENDPOINT = "invalid_endpoint"
     MISSING_DATA = "missing_data"
+    INVALID_INPUT = "invalid_inputs"
+    ALREADY_EXISTS = "already_exists"
+    INVALID_CREDENTIALS = "invalid_credentials"
+    INVALID_TOKEN = "invalid_token"

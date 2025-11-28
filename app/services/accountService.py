@@ -1,10 +1,12 @@
 import uuid
 from typing import Dict
 from app.entities.account import Account
+from app.enums.responseMessages import ResponseMessages
 from app.repositories.accountRepo import AccountRepo
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import check_password, make_password
 from app.services.profileService import ProfileService
+from app.utils.exceptionHelper import ExceptionHelper
 from app.utils.fieldsFilter import FieldsFilter
 from app.utils.redisClient import RedisClient
 from asgiref.sync import sync_to_async
@@ -20,12 +22,12 @@ class AccountService:
     async def get_all(page=1, page_size=20, is_active: bool | None = True):
         try:
             if page <= 0 or page_size <= 0:
-                return None
+                ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
             return await sync_to_async(AccountRepo.all)(
                 page=page, page_size=page_size, is_active=is_active
             )
         except Exception as e:
-            raise e
+            ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
     async def get_by_id(account_id: str, is_active: bool | None = True):
@@ -33,9 +35,9 @@ class AccountService:
             if account_id and str(account_id).strip():
                 uuid_obj = uuid.UUID(account_id)
                 return await sync_to_async(AccountRepo.find_by_id)(uuid_obj, is_active)
-            return None
+            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
         except Exception as e:
-            raise e
+            ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
     async def get_by_username(username: str, is_active: bool | None = True):
@@ -44,18 +46,18 @@ class AccountService:
                 return await sync_to_async(AccountRepo.find_by_username)(
                     username=username, is_active=is_active
                 )
-            return None
+            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
         except Exception as e:
-            raise e
+            ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
     async def get_by_email(email: str, is_active: bool | None = True):
         try:
             if AccountService.is_valid_email(email):
                 return await sync_to_async(AccountRepo.find_by_email)(email=email, is_active=is_active)
-            return None
+            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
         except Exception as e:
-            raise e
+            ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
     async def create(data: Dict):
@@ -64,14 +66,14 @@ class AccountService:
             email = data.get("email")
 
             if await sync_to_async(AccountRepo.find_by_username)(username, None):
-                return None
+                ExceptionHelper.throw_bad_request(ResponseMessages.ALREADY_EXISTS)
 
             if await sync_to_async(AccountRepo.find_by_email)(email, None):
-                return None
+                ExceptionHelper.throw_bad_request(ResponseMessages.ALREADY_EXISTS)
 
             return await sync_to_async(AccountRepo.handle_create)(FieldsFilter(data=data, entity=Account))
         except Exception as e:
-            raise e
+            ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
     async def update(data: Dict):
@@ -80,11 +82,11 @@ class AccountService:
             if account_id and str(account_id).strip() and any(data.values()):
                 account = await AccountService.get_by_id(account_id, None)
                 if not account:
-                    return None
+                    ExceptionHelper.throw_not_found(ResponseMessages.NOT_FOUND)
                 return await sync_to_async(AccountRepo.handle_update)(account, FieldsFilter(data=data, entity=Account))
-            return None
+            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
         except Exception as e:
-            raise e
+            ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
     async def delete(account_id: str):
@@ -92,11 +94,11 @@ class AccountService:
             if account_id and str(account_id).strip():
                 account = await AccountService.get_by_id(account_id, None)
                 if not account:
-                    return None
+                    ExceptionHelper.throw_not_found(ResponseMessages.NOT_FOUND)
                 return await sync_to_async(AccountRepo.handle_delete)(account)
-            return None
+            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
         except Exception as e:
-            raise e
+            ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
     async def hard_delete(account_id: str):
@@ -104,11 +106,11 @@ class AccountService:
             if account_id and str(account_id).strip():
                 account = await AccountService.get_by_id(account_id, None)
                 if not account:
-                    return None
+                    ExceptionHelper.throw_not_found(ResponseMessages.NOT_FOUND)
                 return await sync_to_async(AccountRepo.handle_hard_delete)(account)
-            return None
+            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
         except Exception as e:
-            raise e
+            ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
     async def login(data: Dict):
@@ -118,7 +120,7 @@ class AccountService:
             password = str(data.get("password")).strip()
 
             if not (username or email ) or not password:
-                return None
+                ExceptionHelper.throw_bad_request(ResponseMessages.MISSING_DATA)
 
             account = None
             if username:
@@ -138,9 +140,9 @@ class AccountService:
                     "refresh_token": str(refresh),
                     "account": account,
                 }
-            return None
+            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_CREDENTIALS)
         except Exception as e:
-            raise e
+            ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
     async def sign_up(data: dict):
@@ -163,10 +165,10 @@ class AccountService:
                 data["profile"] = profile
                 return await AccountService.create(data=data)
             else:
-                return None
+                ExceptionHelper.throw_bad_request(ResponseMessages.ALREADY_EXISTS)
 
         except Exception as e:
-            raise e
+            ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
     async def restock_token(refresh_token: str):
@@ -178,7 +180,7 @@ class AccountService:
             if await rd.exists(f"token_{account_id}") != 0:
                 account = await AccountService.get_by_id(account_id)
                 if not account:
-                    return None
+                    ExceptionHelper.throw_not_found(ResponseMessages.NOT_FOUND)
                 
                 refresh = RefreshToken.for_user(account)
                 access = refresh.access_token
@@ -193,6 +195,6 @@ class AccountService:
                     "refresh_token": str(refresh),
                     "account": account,
                 }
-            return None
+            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_TOKEN)
         except Exception as e:
-            raise e
+            ExceptionHelper.handle_caught_exception(error=e)
