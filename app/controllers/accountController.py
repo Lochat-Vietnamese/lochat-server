@@ -22,10 +22,6 @@ class AccountController(View):
                     ExceptionHelper.throw_bad_request(ResponseMessages.MISSING_DATA)
 
                 result = await AccountService.get_by_id( str(account_id), is_active=is_active)
-            
-                if not result:
-                    ExceptionHelper.throw_not_found(ResponseMessages.NOT_FOUND)
-                    
                 return BaseResponse.send(data=AccountMapping(result).data)
 
             ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_ENDPOINT)
