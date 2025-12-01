@@ -120,7 +120,7 @@ class AccountService:
             password = str(data.get("password")).strip()
 
             if not (username or email ) or not password:
-                ExceptionHelper.throw_bad_request(ResponseMessages.MISSING_DATA)
+                ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
 
             account = None
             if username:
@@ -164,9 +164,8 @@ class AccountService:
                 data["password"] = make_password(password)
                 data["profile"] = profile
                 return await AccountService.create(data=data)
-            else:
-                ExceptionHelper.throw_bad_request(ResponseMessages.ALREADY_EXISTS)
 
+            ExceptionHelper.throw_bad_request(ResponseMessages.ALREADY_EXISTS)
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
