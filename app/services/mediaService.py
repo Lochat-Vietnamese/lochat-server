@@ -56,7 +56,7 @@ class MediaService:
                 page = 1
                 page_size = 20
             if media_type and str(media_type).strip():
-                return await sync_to_async(MediaRepo.find_by_type)(MediaTypes(media_type), page=page, page_size=page_size, is_active=is_active, is_active=is_active)
+                return await sync_to_async(MediaRepo.find_by_type)(MediaTypes(media_type), page=page, page_size=page_size, is_active=is_active)
             ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
