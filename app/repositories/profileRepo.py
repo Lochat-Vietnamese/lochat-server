@@ -1,6 +1,8 @@
 import uuid
 from django.core.paginator import Paginator
 from app.entities.profile import Profile
+from app.enums.responseMessages import ResponseMessages
+from app.utils.exceptionHelper import ExceptionHelper
 
 
 class ProfileRepo:
@@ -31,7 +33,7 @@ class ProfileRepo:
                 return Profile.objects.get(id=profile_id)
             return Profile.objects.get(id=profile_id, is_active=is_active)
         except Profile.DoesNotExist:
-            return None
+            ExceptionHelper.throw_not_found(ResponseMessages.NOT_FOUND)
         except Exception as e:
             raise e
 
@@ -65,7 +67,7 @@ class ProfileRepo:
                 return Profile.objects.get(phone_number=phone_number)
             return Profile.objects.get(phone_number=phone_number, is_active=is_active)
         except Profile.DoesNotExist:
-            return None
+            ExceptionHelper.throw_not_found(ResponseMessages.NOT_FOUND)
         except Exception as e:
             raise e
 

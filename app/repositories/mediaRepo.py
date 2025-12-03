@@ -4,6 +4,9 @@ from app.entities.profileConversation import ProfileConversation
 from app.enums.mediaTypes import MediaTypes
 from django.core.paginator import Paginator
 
+from app.enums.responseMessages import ResponseMessages
+from app.utils.exceptionHelper import ExceptionHelper
+
 class MediaRepo:
     @staticmethod
     def all(page: int, page_size: int, is_active: bool | None):
@@ -31,7 +34,7 @@ class MediaRepo:
                 return Media.objects.select_related("uploader").get(id=media_id)
             return Media.objects.select_related("uploader").get(id=media_id, is_active=is_active)
         except Media.DoesNotExist:
-             return None
+             ExceptionHelper.throw_not_found(ResponseMessages.NOT_FOUND)
         except Exception as e:
             raise e
         
@@ -42,7 +45,7 @@ class MediaRepo:
                 return Media.objects.select_related("uploader").get(url=url)
             return Media.objects.select_related("uploader").get(url=url, is_active=is_active)
         except Media.DoesNotExist:
-             return None
+             ExceptionHelper.throw_not_found(ResponseMessages.NOT_FOUND)
         except Exception as e:
             raise e
         
@@ -53,7 +56,7 @@ class MediaRepo:
                 return Media.objects.select_related("uploader").get(uploader=uploader)
             return Media.objects.select_related("uploader").get(uploader=uploader, is_active=is_active)
         except Media.DoesNotExist:
-             return None
+             ExceptionHelper.throw_not_found(ResponseMessages.NOT_FOUND)
         except Exception as e:
             raise e
         
