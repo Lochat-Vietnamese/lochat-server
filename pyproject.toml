@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "lochat-server"
+version = "0.1.0"
+description = "server for lochat"
+authors = [
+    "tuanhao2003 <nhtuanhao@gmail.com>"
+]
+
+[tool.poetry.dependencies]
+python = ">=3.11"
+django = ">=3.1"
+djangorestframework = ">=3.16.1,<4.0.0"
+djangorestframework-simplejwt = ">=5.5.1,<6.0.0"
+django-cors-headers = ">=4.9.0,<5.0.0"
+psycopg2 = ">=2.9.11,<3.0.0"
+channels = ">=4.3.2,<5.0.0"
+channels-redis = ">=4.3.0,<5.0.0"
+redis = ">=7.1.0,<8.0.0"
+django-redis = ">=6.0.0,<7.0.0"
+cryptography = ">=46.0.3,<47.0.0"
+pycryptodome = ">=3.23.0,<4.0.0"
+daphne = ">=4.2.1,<5.0.0"
+aioboto3 = ">=15.5.0,<16.0.0"
+starlette = ">=0.50.0,<0.51.0"
+pydantic = ">=2.12.5,<3.0.0"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
