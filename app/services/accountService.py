@@ -1,5 +1,6 @@
 import uuid
 from typing import Dict
+from app.dtos.accountDTOs import GetByIdDTO
 from app.entities.account import Account
 from app.enums.responseMessages import ResponseMessages
 from app.repositories.accountRepo import AccountRepo
@@ -30,11 +31,13 @@ class AccountService:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def get_by_id(account_id: str, is_active: bool | None = True):
+    async def get_by_id(dto: GetByIdDTO):
         try:
+            account_id = dto.account_id
+            is_active = dto.is_active
+
             if account_id and str(account_id).strip():
-                uuid_obj = uuid.UUID(account_id)
-                return await sync_to_async(AccountRepo.find_by_id)(uuid_obj, is_active)
+                return await sync_to_async(AccountRepo.find_by_id)(account_id=account_id, is_active=is_active)
             ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)

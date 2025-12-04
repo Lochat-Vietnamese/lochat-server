@@ -40,8 +40,7 @@ class MediaService:
     async def get_by_uploader(profile_conversation_id: str, page: int = 1, page_size: int = 20, is_active: bool | None = True):
         try:
             if page <= 0 or page_size <= 0:
-                page = 1
-                page_size = 20
+                ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
             if profile_conversation_id and str(profile_conversation_id).strip():
                 profileConversation = await ProfileConversationService.get_by_id(profile_conversation_id, is_active)
                 return await sync_to_async(MediaRepo.find_by_uploader)(uploader=profileConversation, page=page, page_size=page_size, is_active=is_active)
@@ -53,8 +52,7 @@ class MediaService:
     async def get_by_type(media_type: str, page: int = 1, page_size: int = 20, is_active: bool | None = True):
         try:
             if page <= 0 or page_size <= 0:
-                page = 1
-                page_size = 20
+                ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
             if media_type and str(media_type).strip():
                 return await sync_to_async(MediaRepo.find_by_type)(MediaTypes(media_type), page=page, page_size=page_size, is_active=is_active)
             ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
