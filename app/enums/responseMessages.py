@@ -14,3 +14,6 @@ class ResponseMessages(str, Enum):
     ALREADY_EXISTS = "already_exists"
     INVALID_CREDENTIALS = "invalid_credentials"
     INVALID_TOKEN = "invalid_token"
+
+    def __str__(self):
+        return self.value
