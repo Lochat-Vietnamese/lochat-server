@@ -1,4 +1,4 @@
-from profile import Profile
+from app.entities.profile import Profile
 import uuid
 from typing import Dict
 from asgiref.sync import sync_to_async

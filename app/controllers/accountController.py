@@ -6,7 +6,6 @@ from app.services.accountService import AccountService
 from app.mapping.accountMapping import AccountMapping
 from app.utils.baseResponse import BaseResponse
 from app.utils.exceptionHelper import ExceptionHelper
-from app.utils.parseBool import ParseBool
 from app.utils.requestData import RequestData
 
 
@@ -16,7 +15,7 @@ class AccountController(View):
             data = RequestData(request=request)
 
             if action == "get-by-id":
-                dto = GetByIdDTO(data)
+                dto = GetByIdDTO(**data)
 
                 result = await AccountService.get_by_id(dto)
                 return BaseResponse.send(data=AccountMapping(result).data)
