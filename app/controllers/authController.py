@@ -1,5 +1,8 @@
+from datetime import timedelta
+import os
 from django.views import View
 
+from app.dtos.authDTOs import SignInDTO, SignUpDTO
 from app.enums.responseMessages import ResponseMessages
 from app.services.accountService import AccountService
 from app.mapping.accountMapping import AccountMapping
@@ -14,36 +17,57 @@ class AuthController(View):
             data = RequestData(request=request)
 
             if action == "login":
-                username = data.get("username")
-                email = data.get("email")
-                password = data.get("password")
+                sign_in_dto = SignInDTO(**data)
 
-                if (username or email) and password:
-                    result = await AccountService.login(data)
-                    result["account"] = AccountMapping(result.get("account")).data
-                    return BaseResponse.send(data=result)
-                ExceptionHelper.throw_bad_request(ResponseMessages.MISSING_DATA)
+                result = await AccountService.login(sign_in_dto)
+                account = AccountMapping(result.get("account")).data
+               
+                return BaseResponse.send(data=account, cookies={
+                    "access_token": {
+                        "value": result.get("access_token"),
+                        "httponly": os.environ.get("COOKIE_HTTP_ONLY", True),
+                        "secure": os.environ.get("COOKIE_SECURE", True),
+                        "samesite": os.environ.get("COOKIE_SAMESITE", "Lax"),
+                        "max_age": timedelta(days=int(os.environ.get("JWT_ACCESS_TOKEN_EXPIRES", 15)))
+                    },
+                    "refresh_token": {
+                        "value": result.get("refresh_token"),
+                        "httponly": os.environ.get("COOKIE_HTTP_ONLY", True),
+                        "secure": os.environ.get("COOKIE_SECURE", True),
+                        "samesite": os.environ.get("COOKIE_SAMESITE", "Lax"),
+                        "max_age": timedelta(days=int(os.environ.get("JWT_REFRESH_TOKEN_EXPIRES", 7)))
+                    }
+                })
 
             if action == "sign-up":
-                username = data.get("username")
-                email = data.get("email")
-                password = data.get("password")
-                nickname = data.get("nickname")
-                dob = data.get("dob")
-                phone_number = data.get("phone_number")
+                sign_up_dto = SignUpDTO(**data)
 
-                if all([username, nickname, email, password, dob, phone_number]):
-                    result = await AccountService.sign_up(data)
-                    return BaseResponse.send(data=AccountMapping(result).data)
-                ExceptionHelper.throw_bad_request(ResponseMessages.MISSING_DATA)
+                result = await AccountService.sign_up(sign_up_dto)
+                return BaseResponse.send(data=AccountMapping(result).data)
 
             if action == "restock-token":
-                token = data.get("token")
-                if token:
-                    result = await AccountService.restock_token(token)
-                    result["account"] = AccountMapping(result.get("account")).data
-                    return BaseResponse.send(data=result)
-                ExceptionHelper.throw_bad_request(ResponseMessages.MISSING_DATA)
+                refresh_token = request.COOKIES.get("refresh_token")
+
+                if refresh_token:
+                    result = await AccountService.restock_token(refresh_token)
+                    account = AccountMapping(result.get("account")).data
+                    return BaseResponse.send(data=account, cookies={
+                        "access_token": {
+                            "value": result.get("access_token"),
+                            "httponly": os.environ.get("COOKIE_HTTP_ONLY", True),
+                            "secure": os.environ.get("COOKIE_SECURE", True),
+                            "samesite": os.environ.get("COOKIE_SAMESITE", "Lax"),
+                            "max_age": timedelta(days=int(os.environ.get("JWT_ACCESS_TOKEN_EXPIRES", 15)))
+                        },
+                        "refresh_token": {
+                            "value": result.get("refresh_token"),
+                            "httponly": os.environ.get("COOKIE_HTTP_ONLY", True),
+                            "secure": os.environ.get("COOKIE_SECURE", True),
+                            "samesite": os.environ.get("COOKIE_SAMESITE", "Lax"),
+                            "max_age": timedelta(days=int(os.environ.get("JWT_REFRESH_TOKEN_EXPIRES", 7)))
+                        }
+                    })
+                ExceptionHelper.throw_unauthorized(ResponseMessages.MISSING_TOKEN)
                 
             ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_ENDPOINT)
         except Exception as e:

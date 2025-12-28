@@ -7,7 +7,7 @@ from app.utils.parseBool import ParseBool
 from app.dtos.baseDTO import BaseDTO
 
 
-class SignIn(BaseDTO):
+class SignInDTO(BaseDTO):
     username: str | None = Field(
         title="username",
         example="example",
@@ -24,7 +24,7 @@ class SignIn(BaseDTO):
         min_length=8,
     )
 
-class SignUp(BaseDTO):
+class SignUpDTO(BaseDTO):
     username: str = Field(
         title="username",
         example="example",

@@ -1,6 +1,6 @@
 from django.views import View
 
-from app.dtos.accountDTOs import GetAccountByID
+from app.dtos.accountDTOs import GetAccountByIdDTO
 from app.enums.responseMessages import ResponseMessages
 from app.services.accountService import AccountService
 from app.mapping.accountMapping import AccountMapping
@@ -15,7 +15,7 @@ class AccountController(View):
             data = RequestData(request=request)
 
             if action == "get-by-id":
-                dto = GetAccountByID(**data)
+                dto = GetAccountByIdDTO(**data)
 
                 result = await AccountService.get_by_id(dto)
                 return BaseResponse.send(data=AccountMapping(result).data)
