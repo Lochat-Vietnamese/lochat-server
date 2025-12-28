@@ -17,6 +17,7 @@ class ResponseMessages(str, Enum):
     EXPIRED_TOKEN = "expired_token"
     MISSING_TOKEN = "missing_token"
     ACCOUNT_INACTIVE = "account_inactive"
+    FILE_TOO_LARGE = "file_too_large"
 
     def __str__(self):
         return self.value

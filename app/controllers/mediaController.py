@@ -1,11 +1,11 @@
 from django.views import View
 
+from app.dtos.mediaDTOs import GetMediaByIdDTO, StorageMediaFilesDTO
 from app.enums.responseMessages import ResponseMessages
 from app.mapping.mediaMapping import MediaMapping
 from app.services.mediaService import MediaService
 from app.utils.baseResponse import BaseResponse
 from app.utils.exceptionHelper import ExceptionHelper
-from app.utils.parseBool import ParseBool
 from app.utils.requestData import RequestData
 
 
@@ -15,23 +15,17 @@ class MediaController(View):
             data = RequestData(request=request)
 
             if action == "get-by-id":
-                media_id = data.get("media_id")
-                is_active = ParseBool(data.get("is_active", "true"))
-                if media_id:
-                    result = MediaService.get_by_id(
-                        media_id=media_id, is_active=is_active
-                    )
-                    return BaseResponse.send(data=MediaMapping(result).data)
-                ExceptionHelper.throw_bad_request(ResponseMessages.MISSING_DATA)
+                dto = GetMediaByIdDTO(**data)
+
+                result = MediaService.get_by_id(dto)
+                return BaseResponse.send(data=MediaMapping(result).data)
 
             if action == "upload":
-                files = data.get("files")
-                if files:
-                    result = await MediaService.storage_media_file(data=data)
-                    return BaseResponse.send(
-                        data=MediaMapping(result, many=True).data
-                    )
-                ExceptionHelper.throw_bad_request(ResponseMessages.MISSING_DATA)
+                dto = StorageMediaFilesDTO(**data)
+                result = await MediaService.storage_media_file(data=dto)
+                return BaseResponse.send(
+                    data=MediaMapping(result, many=True).data
+                )
 
             ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_ENDPOINT)
         except Exception as e:
