@@ -3,11 +3,9 @@ from django.views import View
 from app.dtos.profileDTOs import GetAllProfileDTO, GetProfileByIdDTO
 from app.enums.responseMessages import ResponseMessages
 from app.mapping.profileMapping import ProfileMapping
-from app.services.accountService import AccountService
 from app.services.profileService import ProfileService
 from app.utils.baseResponse import BaseResponse
 from app.utils.exceptionHelper import ExceptionHelper
-from app.utils.parseBool import ParseBool
 from app.utils.requestData import RequestData
 
 class ProfileController(View):
