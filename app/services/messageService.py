@@ -1,6 +1,7 @@
 from mailbox import Message
 import uuid
 from typing import Dict
+from app.dtos.messageDTOs import GetLastMessageDTO, GetMessageByConversationDTO, GetMessageByIdDTO
 from app.enums.responseMessages import ResponseMessages
 from app.repositories.messageRepo import MessageRepo
 from app.services.conversationService import ConversationService
@@ -25,12 +26,9 @@ class MessageService:
             ExceptionHelper.handle_caught_exception(error=e)
     
     @staticmethod
-    async def get_by_id(message_id: str, is_active: bool | None = True):
+    async def get_by_id(dto: GetMessageByIdDTO):
         try:
-            if message_id and str(message_id).strip():
-                uuid_obj = uuid.UUID(message_id)
-                return await sync_to_async(MessageRepo.find_by_id)(uuid_obj, is_active)
-            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+            return await sync_to_async(MessageRepo.find_by_id)(message_id=dto.message_id, is_active=dto.is_active)
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
@@ -120,25 +118,19 @@ class MessageService:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def get_last_conversation_message(conversation_id: str):
+    async def get_last_conversation_message(dto: GetLastMessageDTO):
         try:
-            if conversation_id and str(conversation_id).strip():
-                conversation = await ConversationService.get_by_id(conversation_id, is_active=None)
-             
-                return MessageRepo.find_last_conversation_message(conversation=conversation)
-            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+            conversation = await ConversationService.get_by_id(conversation_id=dto.conversation_id, is_active=None)
+            
+            return MessageRepo.find_last_conversation_message(conversation=conversation)
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
         
     @staticmethod
-    async def get_by_conversation(conversation_id: str, page: int = 1, page_size: int = 20, is_active: bool | None = True):
+    async def get_by_conversation(dto: GetMessageByConversationDTO):
         try:
-            if page <= 0 or page_size <= 0:
-                ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
-            if conversation_id:
-                conversation = await ConversationService.get_by_id(conversation_id, is_active=None)
-                
-                return MessageRepo.find_by_conversation(conversation=conversation, page=page, page_size=page_size, is_active=is_active)
-            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+            conversation = await ConversationService.get_by_id(conversation_id=dto.conversation_id, is_active=dto.is_active)
+            
+            return MessageRepo.find_by_conversation(conversation=conversation, page=dto.page, page_size=dto.page_size, is_active=dto.is_active)
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
