@@ -2,6 +2,8 @@ import uuid
 from typing import Dict
 from asgiref.sync import sync_to_async
 
+from app.dtos.profileDTOs import GetProfileByIdDTO
+from app.dtos.relationDTOs import GetRelationByIdDTO, GetRelationByProfilesDTO
 from app.entities.relation import Relation
 from app.enums.responseMessages import ResponseMessages
 from app.repositories.relationRepo import RelationRepo
@@ -21,25 +23,20 @@ class RelationService:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def get_by_id(relation_id: str, is_active: bool | None = True):
+    async def get_by_id(dto: GetRelationByIdDTO):
         try:
-            if relation_id and str(relation_id).strip():
-                uuid_obj = uuid.UUID(relation_id)
-                return await sync_to_async(RelationRepo.find_by_id)(uuid_obj, is_active)
-            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+            return await sync_to_async(RelationRepo.find_by_id)(relation_id=dto.relation_id, is_active=dto.is_active)
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def get_by_both_users(user1_id: str, user2_id: str, is_active: bool | None = True):
+    async def get_by_both_users(dto: GetRelationByProfilesDTO):
         try:
-            if not user1_id or not user2_id:
-                ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
 
-            user1 = await ProfileService.get_by_id(user1_id)
-            user2 = await ProfileService.get_by_id(user2_id)
+            user1 = await ProfileService.get_by_id(dto=GetProfileByIdDTO(**dto.model_dump(exclude={"second_user_id", "is_active"})))
+            user2 = await ProfileService.get_by_id(dto=GetProfileByIdDTO(**dto.model_dump(exclude={"first_user_id", "is_active"})))
 
-            return await sync_to_async(RelationRepo.find_by_both_users)(user1, user2, is_active)
+            return await sync_to_async(RelationRepo.find_by_both_users)(user1, user2, dto.is_active)
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 

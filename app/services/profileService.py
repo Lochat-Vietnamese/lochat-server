@@ -1,4 +1,5 @@
-from profile import Profile
+from app.dtos.profileDTOs import GetAllProfileDTO, GetProfileByIdDTO
+from app.entities.profile import Profile
 import uuid
 from typing import Dict
 from asgiref.sync import sync_to_async
@@ -11,23 +12,16 @@ from app.utils.fieldsFilter import FieldsFilter
 
 class ProfileService:
     @staticmethod
-    async def get_all(page=1, page_size=20, is_active: bool | None = True):
+    async def get_all(dto: GetAllProfileDTO):
         try:
-            if page <= 0 or page_size <= 0:
-                ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
-            return await sync_to_async(ProfileRepo.all)(
-                page=page, page_size=page_size, is_active=is_active
-            )
+            return await sync_to_async(ProfileRepo.all)(page=dto.page, page_size=dto.page_size, is_active=dto.is_active)
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def get_by_id(profile_id: str, is_active: bool | None = True):
+    async def get_by_id(dto: GetProfileByIdDTO):
         try:
-            if profile_id and str(profile_id).strip():
-                uuid_obj = uuid.UUID(profile_id)
-                return await sync_to_async(ProfileRepo.find_by_id)(uuid_obj, is_active)
-            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+            return await sync_to_async(ProfileRepo.find_by_id)(profile_id=dto.profile_id, is_active=dto.is_active)
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 

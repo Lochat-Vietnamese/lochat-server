@@ -6,8 +6,6 @@ from app.entities.conversation import Conversation
 from django.core.paginator import Paginator
 
 from app.enums.conversationTypes import ConversationTypes
-from app.enums.responseMessages import ResponseMessages
-from app.utils.exceptionHelper import ExceptionHelper
 
 
 class ProfileConversationRepo:
@@ -37,7 +35,7 @@ class ProfileConversationRepo:
                 return ProfileConversation.objects.select_related("profile", "conversation").get(id=profileConversation_id)
             return ProfileConversation.objects.select_related("profile", "conversation").get(id=profileConversation_id, is_active=is_active)
         except ProfileConversation.DoesNotExist:
-            ExceptionHelper.throw_not_found(ResponseMessages.NOT_FOUND)
+            return None
         except Exception as e:
             raise e
         
@@ -86,7 +84,7 @@ class ProfileConversationRepo:
                 return ProfileConversation.objects.select_related("profile", "conversation").get(conversation=conversation, profile=profile)
             return ProfileConversation.objects.select_related("profile", "conversation").get(conversation=conversation, profile=profile, is_active=is_active)
         except ProfileConversation.DoesNotExist:
-            ExceptionHelper.throw_not_found(ResponseMessages.NOT_FOUND)
+            return None
         except Exception as e:
             raise e
 

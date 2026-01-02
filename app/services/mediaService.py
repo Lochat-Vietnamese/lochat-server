@@ -1,6 +1,7 @@
 import uuid
 from typing import Dict
 from django.forms import Media
+from app.dtos.mediaDTOs import GetMediaByIdDTO, StorageMediaFilesDTO
 from app.enums.responseMessages import ResponseMessages
 from app.repositories.mediaRepo import MediaRepo
 from app.enums.mediaTypes import MediaTypes
@@ -27,12 +28,9 @@ class MediaService:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def get_by_id(media_id: str, is_active: bool | None = True):
+    async def get_by_id(dto: GetMediaByIdDTO):
         try:
-            if media_id and str(media_id).strip():
-                uuid_obj = uuid.UUID(media_id)
-                return await sync_to_async(MediaRepo.find_by_id)(uuid_obj, is_active)
-            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+            return await sync_to_async(MediaRepo.find_by_id)(media_id=dto.media_id, is_active=dto.is_active)
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
@@ -40,8 +38,7 @@ class MediaService:
     async def get_by_uploader(profile_conversation_id: str, page: int = 1, page_size: int = 20, is_active: bool | None = True):
         try:
             if page <= 0 or page_size <= 0:
-                page = 1
-                page_size = 20
+                ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
             if profile_conversation_id and str(profile_conversation_id).strip():
                 profileConversation = await ProfileConversationService.get_by_id(profile_conversation_id, is_active)
                 return await sync_to_async(MediaRepo.find_by_uploader)(uploader=profileConversation, page=page, page_size=page_size, is_active=is_active)
@@ -53,8 +50,7 @@ class MediaService:
     async def get_by_type(media_type: str, page: int = 1, page_size: int = 20, is_active: bool | None = True):
         try:
             if page <= 0 or page_size <= 0:
-                page = 1
-                page_size = 20
+                ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
             if media_type and str(media_type).strip():
                 return await sync_to_async(MediaRepo.find_by_type)(MediaTypes(media_type), page=page, page_size=page_size, is_active=is_active)
             ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
@@ -124,19 +120,11 @@ class MediaService:
             ExceptionHelper.handle_caught_exception(error=e)
          
     @staticmethod
-    async def storage_media_file(data: dict):
+    async def storage_media_file(dto: StorageMediaFilesDTO):
         try:
-            files = data.get("files")
-            uploader_id = data.get("uploader_id")
-            uploader = None
-            if uploader_id:
-                uploader = await ProfileConversationService.get_by_id(profileConversation_id=uploader_id)
+            uploader = await ProfileConversationService.get_by_id(profileConversation_id=dto.uploader_id, is_active=None)
 
-            else:
-                ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
-
-            if not files:
-                ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+            files = dto.files
             session = aioboto3.Session()
             result = []
 

@@ -1,11 +1,11 @@
 from django.views import View
 
+from app.dtos.accountDTOs import GetAccountByIdDTO
 from app.enums.responseMessages import ResponseMessages
 from app.services.accountService import AccountService
 from app.mapping.accountMapping import AccountMapping
 from app.utils.baseResponse import BaseResponse
 from app.utils.exceptionHelper import ExceptionHelper
-from app.utils.parseBool import ParseBool
 from app.utils.requestData import RequestData
 
 
@@ -15,13 +15,9 @@ class AccountController(View):
             data = RequestData(request=request)
 
             if action == "get-by-id":
-                account_id = data.get("account_id")
-                is_active = ParseBool(data.get("is_active", "true"))
+                dto = GetAccountByIdDTO(**data)
 
-                if not account_id:
-                    ExceptionHelper.throw_bad_request(ResponseMessages.MISSING_DATA)
-
-                result = await AccountService.get_by_id( str(account_id), is_active=is_active)
+                result = await AccountService.get_by_id(dto)
                 return BaseResponse.send(data=AccountMapping(result).data)
 
             ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_ENDPOINT)

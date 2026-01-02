@@ -17,7 +17,7 @@ Including another URLconf
 from django.urls import path
 from app.controllers.accountController import AccountController
 from app.controllers.authController import AuthController
-from app.controllers.conversationsController import ConversationController
+from app.controllers.conversationController import ConversationController
 from app.controllers.profileController import ProfileController
 from app.controllers.profileConversationController import ProfileConversationController
 from app.controllers.relationController import RelationController; 

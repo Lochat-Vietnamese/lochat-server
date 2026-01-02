@@ -1,7 +1,9 @@
 from django.conf import settings
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
+from app.enums.responseMessages import ResponseMessages
 from app.utils.baseResponse import BaseResponse
+from app.utils.exceptionHelper import ExceptionHelper
 
 
 class JwtMiddleware:
@@ -13,24 +15,20 @@ class JwtMiddleware:
         if any(request.path.startswith(path) for path in self.publicEndpoint):
             return self.get_response(request)
 
-        requestHeader = request.headers.get("Authorization")
-        rawAccessToken = None
-        if requestHeader and requestHeader.startswith("Bearer "):
-            rawAccessToken = requestHeader.split(" ")[1]
-        else:
-            rawAccessToken = request.COOKIES.get("access_token")
+        rawAccessToken = request.COOKIES.get("access_token")
             
         if not rawAccessToken:    
-            return BaseResponse.error(message="missing_token")
+            ExceptionHelper.throw_unauthorized(message=ResponseMessages.MISSING_TOKEN)
 
         try:
-            token = AccessToken(rawAccessToken)
-            user_id = token.get("user_id")
+            access_token = AccessToken(rawAccessToken)
+            user_id = access_token.get("user_id")
             if not user_id:
-                return BaseResponse.error(message="invalid_token")
+                ExceptionHelper.throw_unauthorized(message=ResponseMessages.INVALID_TOKEN)
 
             request.user_id = user_id
+            request.access_token = rawAccessToken
         except (TokenError, InvalidToken):
-            return BaseResponse.error(message="expired_token")
+            ExceptionHelper.throw_unauthorized(message=ResponseMessages.EXPIRED_TOKEN)
 
         return self.get_response(request)

@@ -5,9 +5,6 @@ from app.enums.messageTypes import MessageTypes
 from app.entities.message import Message
 from django.core.paginator import Paginator
 
-from app.enums.responseMessages import ResponseMessages
-from app.utils.exceptionHelper import ExceptionHelper
-
 
 class MessageRepo:
     @staticmethod
@@ -36,7 +33,7 @@ class MessageRepo:
                 return Message.objects.select_related("conversation", "sender", "media").get(id=message_id)
             return Message.objects.select_related("conversation", "sender", "media").get(id=message_id, is_active=is_active)
         except Message.DoesNotExist:
-             ExceptionHelper.throw_not_found(ResponseMessages.NOT_FOUND)
+            return None
         except Exception as e:
             raise e
         
@@ -136,7 +133,7 @@ class MessageRepo:
         try:
             return Message.objects.filter(conversation=conversation, is_active=True).order_by("-created_at").first()
         except Message.DoesNotExist:
-             ExceptionHelper.throw_not_found(ResponseMessages.NOT_FOUND)
+            return None
         except Exception as e:
             raise e
         

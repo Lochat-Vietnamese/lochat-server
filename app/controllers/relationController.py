@@ -1,11 +1,11 @@
 from django.views import View
 
+from app.dtos.relationDTOs import GetRelationByIdDTO, GetRelationByProfilesDTO
 from app.enums.responseMessages import ResponseMessages
 from app.mapping.relationMapping import RelationMapping
 from app.services.relationService import RelationService
 from app.utils.baseResponse import BaseResponse
 from app.utils.exceptionHelper import ExceptionHelper
-from app.utils.logHelper import LogHelper
 from app.utils.parseBool import ParseBool
 from app.utils.requestData import RequestData
 
@@ -16,29 +16,18 @@ class RelationController(View):
             data = RequestData(request=request)
 
             if action == "get-by-id":
-                relation_id = data.get("relation_id")
-                is_active = ParseBool(data.get("is_active", "True"))
+                dto = GetRelationByIdDTO(**data)
 
-                if relation_id:
-                    result = await RelationService.get_by_id(
-                        relation_id, is_active=is_active
-                    )
-                    return BaseResponse.send(data=RelationMapping(result).data)
-                ExceptionHelper.throw_bad_request(ResponseMessages.MISSING_DATA)
+                result = await RelationService.get_by_id(dto)
+                return BaseResponse.send(data=RelationMapping(result).data)
 
             if action == "get-by-both-users":
-                user1_id = data.get("first_user_id")
-                user2_id = data.get("second_user_id")
-                is_active = ParseBool(data.get("is_active", "True"))
-
-                if user1_id and user2_id:
-                    result = await RelationService.get_by_both_users(
-                        user1_id, user2_id, is_active=is_active
-                    )
-                    return BaseResponse.send(data=RelationMapping(result).data)
-                ExceptionHelper.throw_bad_request(ResponseMessages.MISSING_DATA)
+                dto = GetRelationByProfilesDTO(**data)
+                result = await RelationService.get_by_both_users(dto)
+                return BaseResponse.send(data=RelationMapping(result).data)
 
             if action == "get-by-user":
+                
                 user_id = data.get("user_id")
                 page = int(data.get("page", "1"))
                 page_size = int(data.get("page_size", "20"))

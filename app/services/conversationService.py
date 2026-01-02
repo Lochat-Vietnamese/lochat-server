@@ -1,5 +1,6 @@
 import uuid
 from typing import Dict
+from app.dtos.conversationDTOs import GetConversationByIdDTO
 from app.entities.conversation import Conversation
 from app.enums.responseMessages import ResponseMessages
 from app.repositories.conversationRepo import ConversationRepo
@@ -23,12 +24,9 @@ class ConversationService:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def get_by_id(conversation_id: str, is_active: bool | None = True):
+    async def get_by_id(dto: GetConversationByIdDTO):
         try:
-            if str(conversation_id).strip():
-                uuid_obj = uuid.UUID(conversation_id)
-                return await sync_to_async(ConversationRepo.find_by_id)(conversation_id=uuid_obj, is_active=is_active)
-            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+            return await sync_to_async(ConversationRepo.find_by_id)(conversation_id=dto.conversation_id, is_active=dto.is_active)
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
         

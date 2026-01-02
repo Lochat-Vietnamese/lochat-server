@@ -4,8 +4,6 @@ from django.db.models import Q
 
 from app.entities.relation import Relation
 from app.entities.profile import Profile
-from app.enums.responseMessages import ResponseMessages
-from app.utils.exceptionHelper import ExceptionHelper
 
 
 class RelationRepo:
@@ -41,7 +39,7 @@ class RelationRepo:
                     id=relation_id, is_active=is_active
                 )
         except Relation.DoesNotExist:
-            ExceptionHelper.throw_not_found(ResponseMessages.NOT_FOUND)
+            return None
         except Exception as e:
             raise e
 
@@ -60,7 +58,7 @@ class RelationRepo:
                     Q(is_active=is_active)
                 )
         except Relation.DoesNotExist:
-            ExceptionHelper.throw_not_found(ResponseMessages.NOT_FOUND)
+            return None
         except Exception as e:
             raise e
 

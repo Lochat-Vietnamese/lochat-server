@@ -1,5 +1,6 @@
 from django.views import View
 
+from app.dtos.conversationDTOs import GetConversationByIdDTO
 from app.enums.responseMessages import ResponseMessages
 from app.mapping.conversationMapping import ConversationMapping
 from app.services.conversationService import ConversationService
@@ -15,14 +16,10 @@ class ConversationController(View):
             data = RequestData(request=request)
 
             if action == "get-by-id":
-                id = data.get("conversation_id")
-                is_active = ParseBool(data.get("is_active", "true"))
-                if id:
-                    result = await ConversationService.get_by_id(
-                        conversation_id=id, is_active=is_active
-                    )
-                    return BaseResponse.send(data=ConversationMapping(result).data)
-                ExceptionHelper.throw_bad_request(ResponseMessages.MISSING_DATA)
+                dto = GetConversationByIdDTO(**data)
+                
+                result = await ConversationService.get_by_id(dto)
+                return BaseResponse.send(data=ConversationMapping(result).data)
 
             ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_ENDPOINT)
         except Exception as e:
