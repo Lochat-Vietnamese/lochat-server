@@ -1,35 +1,49 @@
 from django.http import JsonResponse
-
-from app.enums.responseMessages import ResponseMessages
+from typing import Dict
+from app.enums.responseCodes import ResponseCodes
 
 
 class BaseResponse:
     @staticmethod
-    def send(
-        status_code=200,
-        message=ResponseMessages.SUCCESS,
-        data=None,
-        cookies: dict | None = None,
+    def success(
+        *,
+        data: Dict | None = None,
+        code: str = ResponseCodes.SUCCESS,
+        message: str = "Success",
+        status_code: int = 200,
     ):
-        response = JsonResponse(
-            {
-                "message": message, 
-                "data": data
-            },
+        payload = {
+            "success": True,
+            "code": code,
+            "message": message,
+            "data": data,
+        }
+
+        return JsonResponse(
+            payload,
             status=status_code,
             json_dumps_params={"ensure_ascii": False},
         )
 
-        if cookies:
-            for key, options in cookies.items():
-                response.set_cookie(
-                    key=key,
-                    value=options["value"],
-                    httponly=options.get("httponly", True),
-                    secure=options.get("secure", True),
-                    samesite=options.get("samesite", "Lax"),
-                    max_age=options.get("max_age"),
-                    path=options.get("path", "/"),
-                )
+    @staticmethod
+    def error(
+        *,
+        code: str,
+        message: str,
+        status_code: int,
+        details: Dict | None = None,
+    ):
+        payload = {
+            "success": False,
+            "error": {
+                "code": code,
+                "message": message,
+                "details": details,
+            },
+        }
 
-        return response
+        return JsonResponse(
+            payload,
+            status=status_code,
+            json_dumps_params={"ensure_ascii": False},
+        )

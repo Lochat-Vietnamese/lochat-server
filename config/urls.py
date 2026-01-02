@@ -29,4 +29,8 @@ urlpatterns = [
     path('relation/<str:action>', RelationController.as_view(), name='relation_action'),
     path('conversation/<str:action>', ConversationController.as_view(), name='conversation_action'),
     path('profile-conversation/<str:action>', ProfileConversationController.as_view(), name='profile_conversation_action'),
+
+    path('login', AuthController.as_view(), name='login'),
+    path('signup', AuthController.as_view(), name='signup'),
+    path('logout', AuthController.as_view(), name='logout'),
 ]
