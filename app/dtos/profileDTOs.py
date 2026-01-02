@@ -33,9 +33,9 @@ class GetProfileByIdDTO(BaseDTO):
         title="Profile ID",
         example="123e4567-e89b-12d3-a456-426655440000",
     ),
-    is_active: bool = Field(
+    is_active: bool | None = Field(
         title="Activity Status",
-        default=True, 
+        default=None, 
         examples=True
     )
 
