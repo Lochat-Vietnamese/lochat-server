@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 from typing import Dict
+from app.enums.httpStatus import HttpStatus
 from app.enums.responseCodes import ResponseCodes
 
 
@@ -10,7 +11,7 @@ class BaseResponse:
         data: Dict | None = None,
         code: str = ResponseCodes.SUCCESS,
         message: str = "Success",
-        status_code: int = 200,
+        status_code: int = HttpStatus.OK,
     ):
         payload = {
             "success": True,

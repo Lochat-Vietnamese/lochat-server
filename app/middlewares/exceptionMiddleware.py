@@ -15,5 +15,5 @@ class ExceptionMiddleware(MiddlewareMixin):
                     message = detail
             else:
                 message = str(detail)            
-            return BaseResponse.send(status_code=status_code, message=message)
+            return BaseResponse.error(status_code=status_code, message=message)
         return None
