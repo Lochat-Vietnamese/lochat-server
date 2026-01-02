@@ -155,10 +155,10 @@ class AccountService:
         try:
 
             profile = await ProfileService.get_by_phone_number(
-                phone_number=dto.phone_number, is_active=None
+                phone_number=dto.profile.phone_number, is_active=None
             )
             if not profile:
-                profile = await ProfileService.create(data=FieldsFilter(data=dto, entity=Profile))
+                profile = await ProfileService.create(data=dto.profile.model_dump())
 
             existingUsername = await AccountService.get_by_username(dto.username, None)
             existingEmail = await AccountService.get_by_email(dto.email, None)

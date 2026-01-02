@@ -14,9 +14,10 @@ class GetMediaByIdDTO(BaseDTO):
     media_id: UUID = Field(
         title="Media ID",
         example="123e4567-e89b-12d3-a456-426655440000",
-    ),
-    is_active: bool = Field(
-        default=True, 
+    )
+    is_active: bool | None = Field(
+        title="Media Activity Status",
+        default=None, 
         examples=True
     )
 
@@ -30,7 +31,7 @@ class StorageMediaFilesDTO(BaseDTO):
         title="Files", 
         min_length=1,
         examples=["file1.jpg", "file2.jpg", "file3.jpg"],
-    ),
+    )
     uploader_id: UUID = Field(
         title="Uploader ID",
         example="123e4567-e89b-12d3-a456-426655440000",

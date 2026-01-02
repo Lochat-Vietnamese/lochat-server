@@ -8,12 +8,13 @@ class GetAccountByIdDTO(BaseDTO):
     account_id: UUID = Field(
         title="Account ID",
         example="123e4567-e89b-12d3-a456-426655440000",
-    ),
-    is_active: bool = Field(
-        default=True, 
+    )
+    is_active: bool | None = Field(
+        title="Account Activity Status",
+        default=None, 
         examples=True
     )
 
     @field_validator("is_active", mode="before")
     def parse_is_active(cls, input):
-        return ParseBool(input)
+        return ParseBool(input)   

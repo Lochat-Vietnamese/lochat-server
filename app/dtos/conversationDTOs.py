@@ -8,9 +8,10 @@ class GetConversationByIdDTO(BaseDTO):
     conversation_id: UUID = Field(
         title="Conversation ID",
         example="123e4567-e89b-12d3-a456-426655440000",
-    ),
-    is_active: bool = Field(
-        default=True, 
+    )
+    is_active: bool | None = Field(
+        title="Conversation Activity Status",
+        default=None, 
         examples=True
     )
 

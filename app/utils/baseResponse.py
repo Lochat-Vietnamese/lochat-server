@@ -12,7 +12,10 @@ class BaseResponse:
         cookies: dict | None = None,
     ):
         response = JsonResponse(
-            {"message": message, "data": data},
+            {
+                "message": message, 
+                "data": data
+            },
             status=status_code,
             json_dumps_params={"ensure_ascii": False},
         )
