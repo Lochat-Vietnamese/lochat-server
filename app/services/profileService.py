@@ -6,7 +6,7 @@ from asgiref.sync import sync_to_async
 
 from app.enums.responseMessages import ResponseMessages
 from app.repositories.profileRepo import ProfileRepo
-from app.utils.exceptionHelper import ExceptionHelper
+from app.helpers.exceptionHelper import ExceptionHelper
 from app.utils.fieldsFilter import FieldsFilter
 
 

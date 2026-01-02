@@ -2,8 +2,8 @@ from django.conf import settings
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from app.enums.responseMessages import ResponseMessages
-from app.utils.baseResponse import BaseResponse
-from app.utils.exceptionHelper import ExceptionHelper
+from app.helpers.baseResponse import BaseResponse
+from app.helpers.exceptionHelper import ExceptionHelper
 
 
 class JwtMiddleware:

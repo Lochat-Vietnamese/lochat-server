@@ -7,7 +7,7 @@ from app.repositories.conversationRepo import ConversationRepo
 from app.services.profileService import ProfileService
 from asgiref.sync import sync_to_async
 
-from app.utils.exceptionHelper import ExceptionHelper
+from app.helpers.exceptionHelper import ExceptionHelper
 from app.utils.fieldsFilter import FieldsFilter
 
 

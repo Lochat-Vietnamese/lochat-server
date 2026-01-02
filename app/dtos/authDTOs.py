@@ -1,7 +1,7 @@
 from pydantic import Field, EmailStr, model_validator
 from app.dtos.profileDTOs import CreateProfileDTO
 from app.dtos.baseDTO import BaseDTO
-from app.utils.exceptionHelper import ExceptionHelper
+from app.helpers.exceptionHelper import ExceptionHelper
 
 
 class SignInDTO(BaseDTO):

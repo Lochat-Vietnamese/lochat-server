@@ -1,4 +1,4 @@
-import redis
+import redis.asyncio as redis
 from django.conf import settings
 import json
 

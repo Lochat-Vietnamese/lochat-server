@@ -4,8 +4,8 @@ from app.dtos.conversationDTOs import GetConversationByIdDTO
 from app.enums.responseMessages import ResponseMessages
 from app.mapping.conversationMapping import ConversationMapping
 from app.services.conversationService import ConversationService
-from app.utils.baseResponse import BaseResponse
-from app.utils.exceptionHelper import ExceptionHelper
+from app.helpers.baseResponse import BaseResponse
+from app.helpers.exceptionHelper import ExceptionHelper
 from app.utils.parseBool import ParseBool
 from app.utils.requestData import RequestData
 

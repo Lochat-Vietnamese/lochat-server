@@ -4,8 +4,8 @@ from app.dtos.messageDTOs import GetLastMessageDTO, GetMessageByConversationDTO,
 from app.enums.responseMessages import ResponseMessages
 from app.mapping.messageMapping import MessageMapping
 from app.services.messageService import MessageService
-from app.utils.baseResponse import BaseResponse
-from app.utils.exceptionHelper import ExceptionHelper
+from app.helpers.baseResponse import BaseResponse
+from app.helpers.exceptionHelper import ExceptionHelper
 from app.utils.requestData import RequestData
 
 

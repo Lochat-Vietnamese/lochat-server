@@ -4,8 +4,8 @@ from app.dtos.relationDTOs import GetRelationByIdDTO, GetRelationByProfilesDTO
 from app.enums.responseMessages import ResponseMessages
 from app.mapping.relationMapping import RelationMapping
 from app.services.relationService import RelationService
-from app.utils.baseResponse import BaseResponse
-from app.utils.exceptionHelper import ExceptionHelper
+from app.helpers.baseResponse import BaseResponse
+from app.helpers.exceptionHelper import ExceptionHelper
 from app.utils.parseBool import ParseBool
 from app.utils.requestData import RequestData
 

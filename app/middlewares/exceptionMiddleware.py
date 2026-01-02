@@ -1,6 +1,6 @@
 from rest_framework.exceptions import APIException
 from django.utils.deprecation import MiddlewareMixin
-from app.utils.baseResponse import BaseResponse
+from app.helpers.baseResponse import BaseResponse
 
 class ExceptionMiddleware(MiddlewareMixin):
     def process_exception(self, request, exception):

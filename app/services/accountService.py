@@ -8,9 +8,9 @@ from app.repositories.accountRepo import AccountRepo
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import check_password, make_password
 from app.services.profileService import ProfileService
-from app.utils.exceptionHelper import ExceptionHelper
+from app.helpers.exceptionHelper import ExceptionHelper
 from app.utils.fieldsFilter import FieldsFilter
-from app.utils.redisClient import RedisClient
+from app.infrastructures.redis.redisClient import RedisClient
 from asgiref.sync import sync_to_async
 
 class AccountService:

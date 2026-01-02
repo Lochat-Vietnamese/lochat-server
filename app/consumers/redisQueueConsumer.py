@@ -7,7 +7,7 @@ from app.mapping.mediaMapping import MediaMapping
 from app.mapping.messageMapping import MessageMapping
 from app.mapping.profileMapping import ProfileMapping
 from app.utils.logHelper import LogHelper
-from app.utils.redisClient import RedisClient
+from app.infrastructures.redis.redisClient import RedisClient
 from app.services.messageService import MessageService
 from app.enums.messageTypes import MessageTypes
 from app.services.mediaService import MediaService

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict, ValidationError
-from app.utils.exceptionHelper import ExceptionHelper
+from app.helpers.exceptionHelper import ExceptionHelper
 
 class BaseDTO(BaseModel):
     model_config = ConfigDict(

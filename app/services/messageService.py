@@ -10,7 +10,7 @@ from app.services.mediaService import MediaService
 from app.enums.messageTypes import MessageTypes
 from asgiref.sync import sync_to_async
 
-from app.utils.exceptionHelper import ExceptionHelper
+from app.helpers.exceptionHelper import ExceptionHelper
 from app.utils.fieldsFilter import FieldsFilter
 
 class MessageService:

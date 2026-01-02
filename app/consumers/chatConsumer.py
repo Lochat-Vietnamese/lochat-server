@@ -7,7 +7,7 @@ from django.contrib.auth.models import AnonymousUser
 from app.services.accountService import AccountService
 from app.enums.messageTypes import MessageTypes
 from app.utils.logHelper import LogHelper
-from app.utils.redisClient import RedisClient
+from app.infrastructures.redis.redisClient import RedisClient
 
 
 class ChatConsumer(AsyncWebsocketConsumer):

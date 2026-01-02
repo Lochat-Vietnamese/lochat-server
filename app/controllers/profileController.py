@@ -4,8 +4,8 @@ from app.dtos.profileDTOs import GetAllProfileDTO, GetProfileByIdDTO
 from app.enums.responseMessages import ResponseMessages
 from app.mapping.profileMapping import ProfileMapping
 from app.services.profileService import ProfileService
-from app.utils.baseResponse import BaseResponse
-from app.utils.exceptionHelper import ExceptionHelper
+from app.helpers.baseResponse import BaseResponse
+from app.helpers.exceptionHelper import ExceptionHelper
 from app.utils.requestData import RequestData
 
 class ProfileController(View):

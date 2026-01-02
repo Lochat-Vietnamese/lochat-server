@@ -10,7 +10,7 @@ from django.conf import settings
 from asgiref.sync import sync_to_async
 
 from app.services.profileConversationService import ProfileConversationService
-from app.utils.exceptionHelper import ExceptionHelper
+from app.helpers.exceptionHelper import ExceptionHelper
 from app.utils.fieldsFilter import FieldsFilter
 
 

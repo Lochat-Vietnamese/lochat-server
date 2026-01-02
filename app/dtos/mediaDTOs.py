@@ -3,7 +3,7 @@ from typing import List
 from uuid import UUID
 from pydantic import Field, field_validator
 from app.enums.responseMessages import ResponseMessages
-from app.utils.exceptionHelper import ExceptionHelper
+from app.helpers.exceptionHelper import ExceptionHelper
 from app.utils.parseBool import ParseBool
 from app.dtos.baseDTO import BaseDTO
 from django.core.files.uploadedfile import UploadedFile

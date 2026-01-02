@@ -3,8 +3,8 @@ from django.views import View
 from app.enums.responseMessages import ResponseMessages
 from app.mapping.profileConversationMapping import ProfileConversationMapping
 from app.services.profileConversationService import ProfileConversationService
-from app.utils.baseResponse import BaseResponse
-from app.utils.exceptionHelper import ExceptionHelper
+from app.helpers.baseResponse import BaseResponse
+from app.helpers.exceptionHelper import ExceptionHelper
 from app.utils.parseBool import ParseBool
 from app.utils.requestData import RequestData
 

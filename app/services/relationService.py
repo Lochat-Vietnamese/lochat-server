@@ -8,7 +8,7 @@ from app.entities.relation import Relation
 from app.enums.responseMessages import ResponseMessages
 from app.repositories.relationRepo import RelationRepo
 from app.services.profileService import ProfileService
-from app.utils.exceptionHelper import ExceptionHelper
+from app.helpers.exceptionHelper import ExceptionHelper
 from app.utils.fieldsFilter import FieldsFilter
 
 
