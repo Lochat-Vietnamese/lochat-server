@@ -2,7 +2,6 @@ from typing import Dict
 from app.dtos.accountDTOs import GetAccountByIdDTO
 from app.dtos.authDTOs import SignInDTO, SignUpDTO
 from app.entities.account import Account
-from app.entities.profile import Profile
 from app.enums.responseMessages import ResponseMessages
 from app.repositories.accountRepo import AccountRepo
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -115,7 +114,7 @@ class AccountService:
             ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
-
+    
     @staticmethod
     async def login(dto: SignInDTO):
         try:
@@ -130,7 +129,7 @@ class AccountService:
                 account = await AccountService.get_by_email(email=email)
 
             if account and not account.is_active:
-                ExceptionHelper.throw_bad_request(ResponseMessages.ACCOUNT_INACTIVE)
+                ExceptionHelper.throw_bad_request("Account is not active")
 
             if account and check_password(password, account.password):
                 refresh = RefreshToken.for_user(account)
@@ -145,7 +144,7 @@ class AccountService:
                     "refresh_token": str(refresh),
                     "account": account,
                 }
-            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_CREDENTIALS)
+            ExceptionHelper.throw_bad_request("Invalid username or password")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
@@ -172,7 +171,7 @@ class AccountService:
 
                 return await AccountService.create(data=account_data)
 
-            ExceptionHelper.throw_bad_request(ResponseMessages.ALREADY_EXISTS)
+            ExceptionHelper.throw_bad_request("Account already exists")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 

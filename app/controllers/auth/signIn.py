@@ -3,6 +3,9 @@ import os
 from django.views import View
 
 from app.dtos.authDTOs import SignInDTO
+from app.enums.httpStatus import HttpStatus
+from app.enums.responseCodes import ResponseCodes
+from app.helpers.cookieHelper import CookieHelper
 from app.mapping.accountMapping import AccountMapping
 from app.services.accountService import AccountService
 from app.helpers.baseResponse import BaseResponse
@@ -10,7 +13,7 @@ from app.helpers.exceptionHelper import ExceptionHelper
 from app.utils.requestData import RequestData
 
 
-class SignInController(View):
+class SignIn(View):
     async def post(self, request):
         try:
             raw_data = RequestData(request=request)
@@ -19,7 +22,7 @@ class SignInController(View):
             result = await AccountService.login(sign_in_dto)
             account = AccountMapping(result.get("account")).data
             
-            return BaseResponse.send(data=account, cookies=self._set_cookies(result))
+            return CookieHelper.attach(response=BaseResponse.success(data=account, code=ResponseCodes.LOGIN_SUCCESS, message="Login successfully"), cookies=self._set_cookies(result))
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
     
