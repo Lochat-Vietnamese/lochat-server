@@ -4,7 +4,6 @@ from uuid import UUID
 from pydantic import Field, field_validator
 from app.enums.responseMessages import ResponseMessages
 from app.helpers.exceptionHelper import ExceptionHelper
-from app.utils.parseBool import ParseBool
 from app.dtos.baseDTO import BaseDTO
 from django.core.files.uploadedfile import UploadedFile
 
@@ -15,15 +14,6 @@ class GetMediaByIdDTO(BaseDTO):
         title="Media ID",
         example="123e4567-e89b-12d3-a456-426655440000",
     )
-    is_active: bool | None = Field(
-        title="Media Activity Status",
-        default=None, 
-        examples=True
-    )
-
-    @field_validator("is_active", mode="before")
-    def parse_is_active(cls, input):
-        return ParseBool(input)
 
 
 class StorageMediaFilesDTO(BaseDTO):

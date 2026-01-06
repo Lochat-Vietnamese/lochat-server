@@ -15,16 +15,17 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path
+from app.controllers.account.accountController import AccountController
 from app.controllers.auth.logout import Logout
 from app.controllers.auth.restockToken import RestockToken
 from app.controllers.auth.signUp import SignUp
 from app.controllers.auth.signIn import SignIn
 
 urlpatterns = [
-    path('signin', SignIn.as_view(), name='login'),
-    path('signup', SignUp.as_view(), name='signup'),
-    path('logout', Logout.as_view(), name='logout'),
-    path('restock-token', RestockToken.as_view(), name='restock-token'),
+    path('signin/', SignIn.as_view(), name='login'),
+    path('signup/', SignUp.as_view(), name='signup'),
+    path('logout/', Logout.as_view(), name='logout'),
+    path('restock-token/', RestockToken.as_view(), name='restock-token'),
 
-    
+    path('accounts/<uuid:account_id>/', AccountController.as_view(), name='accounts'),
 ]

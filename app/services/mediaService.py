@@ -1,7 +1,8 @@
+from typing import Dict, List
 import uuid
-from typing import Dict
+from uuid import UUID
 from django.forms import Media
-from app.dtos.mediaDTOs import GetMediaByIdDTO, StorageMediaFilesDTO
+from django.core.files.uploadedfile import UploadedFile
 from app.enums.responseMessages import ResponseMessages
 from app.repositories.mediaRepo import MediaRepo
 from app.enums.mediaTypes import MediaTypes
@@ -28,9 +29,9 @@ class MediaService:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def get_by_id(dto: GetMediaByIdDTO):
+    async def get_by_id(media_id: str, is_active: bool | None = True):
         try:
-            return await sync_to_async(MediaRepo.find_by_id)(media_id=dto.media_id, is_active=dto.is_active)
+            return await sync_to_async(MediaRepo.find_by_id)(media_id=UUID(media_id), is_active=is_active)
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
@@ -120,11 +121,10 @@ class MediaService:
             ExceptionHelper.handle_caught_exception(error=e)
          
     @staticmethod
-    async def storage_media_file(dto: StorageMediaFilesDTO):
+    async def storage_media_file(files: List[UploadedFile], uploader_id: UUID):
         try:
-            uploader = await ProfileConversationService.get_by_id(profileConversation_id=dto.uploader_id, is_active=None)
+            uploader = await ProfileConversationService.get_by_id(profileConversation_id=uploader_id, is_active=None)
 
-            files = dto.files
             session = aioboto3.Session()
             result = []
 

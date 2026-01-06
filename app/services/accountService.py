@@ -1,4 +1,5 @@
 from typing import Dict
+from uuid import UUID
 from app.entities.account import Account
 from app.enums.responseMessages import ResponseMessages
 from app.helpers import UnitOfWorkWrapper
@@ -33,7 +34,7 @@ class AccountService:
     async def get_by_id(account_id: str, is_active: bool | None = True):
         try:
             if account_id and str(account_id).strip():
-                return await sync_to_async(AccountRepo.find_by_id)(account_id=account_id, is_active=is_active)
+                return await sync_to_async(AccountRepo.find_by_id)(account_id=UUID(account_id), is_active=is_active)
             ExceptionHelper.throw_bad_request("Missing account id")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
