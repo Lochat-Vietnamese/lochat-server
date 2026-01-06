@@ -181,12 +181,12 @@ class AccountService:
             token = RefreshToken(refresh_token)
             account_id = token["user_id"]
 
+            account = await AccountService.get_by_id(account_id)
+            if not account:
+                ExceptionHelper.throw_unauthorized("Invalid token")
+            
             rd = await RedisClient.instance()
             if await rd.exists(f"token_{account_id}") != 0:
-                account = await AccountService.get_by_id(account_id)
-                if not account:
-                    ExceptionHelper.throw_unauthorized(ResponseMessages.INVALID_TOKEN)
-                
                 refresh = RefreshToken.for_user(account)
                 access = refresh.access_token
                 await rd.add(
@@ -200,6 +200,22 @@ class AccountService:
                     "refresh_token": str(refresh),
                     "account": account,
                 }
-            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_TOKEN)
+            ExceptionHelper.throw_unauthorized()
+        except Exception as e:
+            ExceptionHelper.handle_caught_exception(error=e)
+
+    @staticmethod
+    async def logout(refresh_token: str):
+        try:
+            token = RefreshToken(refresh_token)
+            account_id = token["user_id"]
+
+            account = await AccountService.get_by_id(account_id)
+            if not account:
+                ExceptionHelper.throw_unauthorized("Invalid token")
+
+            rd = await RedisClient.instance()
+            await rd.delete(f"token_{account_id}")
+            return
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
