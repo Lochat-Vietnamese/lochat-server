@@ -29,14 +29,14 @@ class MediaService:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def get_by_id(media_id: str, is_active: bool | None = True):
+    async def get_by_id(media_id: UUID, is_active: bool | None = True):
         try:
             return await sync_to_async(MediaRepo.find_by_id)(media_id=UUID(media_id), is_active=is_active)
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def get_by_uploader(profile_conversation_id: str, page: int = 1, page_size: int = 20, is_active: bool | None = True):
+    async def get_by_uploader(profile_conversation_id: UUID, page: int = 1, page_size: int = 20, is_active: bool | None = True):
         try:
             if page <= 0 or page_size <= 0:
                 ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
@@ -99,7 +99,7 @@ class MediaService:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def delete(media_id: str):
+    async def delete(media_id: UUID):
         try:
             if media_id and str(media_id).strip():
                 media = await MediaService.get_by_id(media_id, is_active=None)
@@ -110,7 +110,7 @@ class MediaService:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def hard_delete(media_id: str):
+    async def hard_delete(media_id: UUID):
         try:
             if media_id and str(media_id).strip():
                 media = await MediaService.get_by_id(media_id, is_active=None)

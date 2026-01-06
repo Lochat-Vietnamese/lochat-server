@@ -23,9 +23,9 @@ class ConversationService:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def get_by_id(conversation_id: str, is_active: bool | None = True):
+    async def get_by_id(conversation_id: UUID, is_active: bool | None = True):
         try:
-            return await sync_to_async(ConversationRepo.find_by_id)(conversation_id=UUID(conversation_id), is_active=is_active)
+            return await sync_to_async(ConversationRepo.find_by_id)(conversation_id=conversation_id, is_active=is_active)
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
         
@@ -64,7 +64,7 @@ class ConversationService:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def delete(conversation_id: str):
+    async def delete(conversation_id: UUID):
         try:
             if conversation_id and str(conversation_id).strip():
                 conversation = await ConversationService.get_by_id(conversation_id, None)
@@ -75,7 +75,7 @@ class ConversationService:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def hard_delete(conversation_id: str):
+    async def hard_delete(conversation_id: UUID):
         try:
             if conversation_id and str(conversation_id).strip():
                 conversation = await ConversationService.get_by_id(conversation_id, None)

@@ -31,10 +31,10 @@ class AccountService:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def get_by_id(account_id: str, is_active: bool | None = True):
+    async def get_by_id(account_id: UUID, is_active: bool | None = True):
         try:
             if account_id and str(account_id).strip():
-                return await sync_to_async(AccountRepo.find_by_id)(account_id=UUID(account_id), is_active=is_active)
+                return await sync_to_async(AccountRepo.find_by_id)(account_id=account_id, is_active=is_active)
             ExceptionHelper.throw_bad_request("Missing account id")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
@@ -89,7 +89,7 @@ class AccountService:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def delete(account_id: str):
+    async def delete(account_id: UUID):
         try:
             if account_id and str(account_id).strip():
                 account = await AccountService.get_by_id(account_id, None)
@@ -101,7 +101,7 @@ class AccountService:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def hard_delete(account_id: str):
+    async def hard_delete(account_id: UUID):
         try:
             if account_id and str(account_id).strip():
                 account = await AccountService.get_by_id(account_id, None)
