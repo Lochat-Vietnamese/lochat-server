@@ -1,6 +1,7 @@
 from django.views import View
 
 from app.dtos.accountDTOs import GetAccountByIdDTO
+from app.enums.responseCodes import ResponseCodes
 from app.enums.responseMessages import ResponseMessages
 from app.services.accountService import AccountService
 from app.mapping.accountMapping import AccountMapping
@@ -10,16 +11,17 @@ from app.utils.requestData import RequestData
 
 
 class AccountController(View):
-    async def post(self, request, action=None):
+    async def get(self, request, account_id=None):
         try:
-            data = RequestData(request=request)
+            if account_id:
+                dto = GetAccountByIdDTO(account_id=account_id)
 
-            if action == "get-by-id":
-                dto = GetAccountByIdDTO(**data)
+                result = await AccountService.get_by_id(account_id=dto.account_id)
+                return BaseResponse.success(
+                    data=AccountMapping(result).data,
+                    code=ResponseCodes.GET_ACCOUNT_BY_ID_SUCCESS,
+                    message="Get account by id successfully",
+                )
 
-                result = await AccountService.get_by_id(dto)
-                return BaseResponse.send(data=AccountMapping(result).data)
-
-            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_ENDPOINT)
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)

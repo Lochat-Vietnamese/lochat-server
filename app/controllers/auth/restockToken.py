@@ -10,7 +10,7 @@ from app.mapping.accountMapping import AccountMapping
 from app.services.accountService import AccountService
 
 
-class SignUp(View):
+class RestockToken(View):
     async def get(self, request):
         try:
            

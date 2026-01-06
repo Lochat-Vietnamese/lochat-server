@@ -15,22 +15,16 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path
-from app.controllers.accountController import AccountController
-from app.controllers.authController import AuthController
-from app.controllers.conversationController import ConversationController
-from app.controllers.profileController import ProfileController
-from app.controllers.profileConversationController import ProfileConversationController
-from app.controllers.relationController import RelationController; 
+from app.controllers.auth.logout import Logout
+from app.controllers.auth.restockToken import RestockToken
+from app.controllers.auth.signUp import SignUp
+from app.controllers.auth.signIn import SignIn
 
 urlpatterns = [
-    path('<str:action>', AuthController.as_view(), name='auth_action'),
-    path('account/<str:action>', AccountController.as_view(), name='account_action'),
-    path('profile/<str:action>', ProfileController.as_view(), name='profile_action'),
-    path('relation/<str:action>', RelationController.as_view(), name='relation_action'),
-    path('conversation/<str:action>', ConversationController.as_view(), name='conversation_action'),
-    path('profile-conversation/<str:action>', ProfileConversationController.as_view(), name='profile_conversation_action'),
+    path('signin', SignIn.as_view(), name='login'),
+    path('signup', SignUp.as_view(), name='signup'),
+    path('logout', Logout.as_view(), name='logout'),
+    path('restock-token', RestockToken.as_view(), name='restock-token'),
 
-    path('login', AuthController.as_view(), name='login'),
-    path('signup', AuthController.as_view(), name='signup'),
-    path('logout', AuthController.as_view(), name='logout'),
+    
 ]

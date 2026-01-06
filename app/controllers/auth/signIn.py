@@ -19,7 +19,7 @@ class SignIn(View):
             raw_data = RequestData(request=request)
             sign_in_dto = SignInDTO(**raw_data)
 
-            result = await AccountService.login(sign_in_dto)
+            result = await AccountService.login(sign_in_dto.model_dump())
             account = AccountMapping(result.get("account")).data
             
             return CookieHelper.attach(response=BaseResponse.success(data=account, code=ResponseCodes.LOGIN_SUCCESS, message="Login successfully"), cookies=self._set_cookies(result))

@@ -1,8 +1,7 @@
 from typing import Dict
-from app.dtos.accountDTOs import GetAccountByIdDTO
-from app.dtos.authDTOs import SignInDTO, SignUpDTO
 from app.entities.account import Account
 from app.enums.responseMessages import ResponseMessages
+from app.helpers import UnitOfWorkWrapper
 from app.repositories.accountRepo import AccountRepo
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import check_password, make_password
@@ -31,14 +30,11 @@ class AccountService:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def get_by_id(dto: GetAccountByIdDTO):
+    async def get_by_id(account_id: str, is_active: bool | None = True):
         try:
-            account_id = dto.account_id
-            is_active = dto.is_active
-
             if account_id and str(account_id).strip():
                 return await sync_to_async(AccountRepo.find_by_id)(account_id=account_id, is_active=is_active)
-            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+            ExceptionHelper.throw_bad_request("Missing account id")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
@@ -116,11 +112,11 @@ class AccountService:
             ExceptionHelper.handle_caught_exception(error=e)
     
     @staticmethod
-    async def login(dto: SignInDTO):
+    async def login(data: Dict):
         try:
-            username = dto.username
-            email = dto.email
-            password = dto.password
+            username = data.get('username')
+            email = data.get('email')
+            password = data.get('password')
 
             account = None
             if username:
@@ -149,29 +145,36 @@ class AccountService:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    # sửa lại dùng unit of work
-    async def sign_up(dto: SignUpDTO):
+    async def sign_up(data: Dict):
         try:
+            username = data.get("username")
+            email = data.get("email")
+            password = data.get("password")
+            profile_data = data.get("profile")
 
-            profile = await ProfileService.get_by_phone_number(
-                phone_number=dto.profile.phone_number, is_active=None
-            )
-            if not profile:
-                profile = await ProfileService.create(data=dto.profile.model_dump())
+            if not all([username, email, password, profile_data]):
+                ExceptionHelper.throw_bad_request("Missing required fields")
+            
+            existingUsername = await AccountService.get_by_username(username, None)
+            existingEmail = await AccountService.get_by_email(email, None)
+            if existingUsername or existingEmail:
+                ExceptionHelper.throw_bad_request("Account already exists")
 
-            existingUsername = await AccountService.get_by_username(dto.username, None)
-            existingEmail = await AccountService.get_by_email(dto.email, None)
-            if not existingUsername and not existingEmail:
+            async with UnitOfWorkWrapper():
+                profile = await ProfileService.get_by_phone_number(
+                    phone_number=profile_data.get("phone_number"), is_active=None
+                )
+                if not profile:
+                    profile = await ProfileService.create(data=profile_data)
 
                 account_data = {
-                    **dto.model_dump(exclude={"password"}),
-                    "password": make_password(dto.password),
+                    "username": username,
+                    "email": email,
+                    "password": make_password(password),
                     "profile": profile,
                 }
-
                 return await AccountService.create(data=account_data)
 
-            ExceptionHelper.throw_bad_request("Account already exists")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
