@@ -26,9 +26,11 @@ class MessageService:
             ExceptionHelper.handle_caught_exception(error=e)
     
     @staticmethod
-    async def get_by_id(dto: GetMessageByIdDTO):
+    async def get_by_id(message_id: str, is_active: bool | None = True):
         try:
-            return await sync_to_async(MessageRepo.find_by_id)(message_id=dto.message_id, is_active=dto.is_active)
+            if message_id and str(message_id).strip():
+                message_id = uuid.UUID(message_id)
+            return await sync_to_async(MessageRepo.find_by_id)(message_id=message_id, is_active=is_active)
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
@@ -118,19 +120,19 @@ class MessageService:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def get_last_conversation_message(dto: GetLastMessageDTO):
+    async def get_last_conversation_message(conversation_id: str):
         try:
-            conversation = await ConversationService.get_by_id(conversation_id=dto.conversation_id, is_active=None)
+            conversation = await ConversationService.get_by_id(conversation_id=conversation_id, is_active=None)
             
             return MessageRepo.find_last_conversation_message(conversation=conversation)
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
         
     @staticmethod
-    async def get_by_conversation(dto: GetMessageByConversationDTO):
+    async def get_by_conversation(conversation_id: str, page: int = 1, page_size: int = 20, is_active: bool | None = True):
         try:
-            conversation = await ConversationService.get_by_id(conversation_id=dto.conversation_id, is_active=dto.is_active)
+            conversation = await ConversationService.get_by_id(conversation_id=conversation_id, is_active=is_active)
             
-            return MessageRepo.find_by_conversation(conversation=conversation, page=dto.page, page_size=dto.page_size, is_active=dto.is_active)
+            return MessageRepo.find_by_conversation(conversation=conversation, page=page, page_size=page_size, is_active=is_active)
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)

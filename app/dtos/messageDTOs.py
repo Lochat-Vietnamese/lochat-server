@@ -9,20 +9,16 @@ class GetMessageByIdDTO(BaseDTO):
         title="Message ID",
         example="123e4567-e89b-12d3-a456-426655440000",
     )
-    is_active: bool | None = Field(
-        title="Message Activity Status",
-        default=None, 
-        examples=True
-    )
-
-    @field_validator("is_active", mode="before")
-    def parse_is_active(cls, input):
-        return ParseBool(input)
     
-class GetMessageByConversationDTO(BaseDTO):
+class SearchMessagesDTO(BaseDTO):
     conversation_id: UUID = Field(
         title="Conversation ID",
         example="123e4567-e89b-12d3-a456-426655440000",
+    )
+    get_last: bool | None = Field(
+        title="Get Last Message",
+        default=None, 
+        examples=True
     )
     page: int = Field(
         title="Current Page",
@@ -46,9 +42,3 @@ class GetMessageByConversationDTO(BaseDTO):
     @field_validator("is_active", mode="before")
     def parse_is_active(cls, input):
         return ParseBool(input)
-    
-class GetLastMessageDTO(BaseDTO):
-    conversation_id: UUID = Field(
-        title="Conversation ID",
-        example="123e4567-e89b-12d3-a456-426655440000",
-    )
