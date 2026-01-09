@@ -3,7 +3,6 @@ from typing import Optional
 from uuid import UUID
 from pydantic import Field, field_validator
 from app.enums.provinces import Provinces
-from app.utils.parseBool import ParseBool
 from app.dtos.baseDTO import BaseDTO
 
 
@@ -21,30 +20,12 @@ class GetAllProfileDTO(BaseDTO):
         default=10, 
         examples=10
     )
-    is_active: bool | None = Field(
-        title="Profiles Activity Status",
-        default=None, 
-        examples=True
-    )
-
-    @field_validator("is_active", mode="before")
-    def parse_is_active(cls, input):
-        return ParseBool(input)
 
 class GetProfileByIdDTO(BaseDTO):
     profile_id: UUID = Field(
         title="Profile ID",
         example="123e4567-e89b-12d3-a456-426655440000",
     ),
-    is_active: bool | None = Field(
-        title="Profile Activity Status",
-        default=None, 
-        examples=True
-    )
-
-    @field_validator("is_active", mode="before")
-    def parse_is_active(cls, input):
-        return ParseBool(input)
     
 class CreateProfileDTO(BaseDTO):
     nickname: str = Field(

@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from typing import Dict
+from typing import Dict, List
 from app.enums.httpStatus import HttpStatus
 from app.enums.responseCodes import ResponseCodes
 
@@ -8,16 +8,17 @@ class BaseResponse:
     @staticmethod
     def success(
         *,
-        data: Dict | None = None,
+        status_code: int = HttpStatus.OK,
         code: str = ResponseCodes.SUCCESS,
         message: str = "Success",
-        status_code: int = HttpStatus.OK,
+        data: Dict | List | None = None,
+        meta: Dict | None = None,
     ):
         payload = {
-            "success": True,
             "code": code,
             "message": message,
             "data": data,
+            "meta": meta
         }
 
         return JsonResponse(
@@ -35,12 +36,9 @@ class BaseResponse:
         details: Dict | None = None,
     ):
         payload = {
-            "success": False,
-            "error": {
-                "code": code,
-                "message": message,
-                "details": details,
-            },
+            "code": code,
+            "message": message,
+            "errors": details,
         }
 
         return JsonResponse(

@@ -1,6 +1,8 @@
 import uuid
 from django.core.paginator import Paginator
 from app.entities.profile import Profile
+from app.utils.fieldsFilter import FieldsFilter
+from django.db.models import Q
 
 
 class ProfileRepo:
@@ -100,5 +102,30 @@ class ProfileRepo:
         try:
             profile.delete()
             return True
+        except Exception as e:
+            raise e
+        
+    @staticmethod
+    def handle_search_profiles(
+        search_data: dict,
+        page: int = 1,
+        page_size: int = 20,
+    ):
+        try:
+            data = FieldsFilter(data=search_data, entity=Profile)
+            filters = Q()
+            for field, value in data.items():
+                filters &= Q(**{field: value})
+
+            queryset = Profile.objects.filter(filters).order_by("-created_at")
+
+            paginator = Paginator(queryset, page_size)
+            items = paginator.page(page)
+
+            return {
+                "pages": paginator.num_pages,
+                "current": items.number,
+                "content": list(items),
+            }
         except Exception as e:
             raise e

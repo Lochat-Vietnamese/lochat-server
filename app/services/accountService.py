@@ -1,7 +1,6 @@
 from typing import Dict
 from uuid import UUID
 from app.entities.account import Account
-from app.enums.responseMessages import ResponseMessages
 from app.helpers import UnitOfWorkWrapper
 from app.repositories.accountRepo import AccountRepo
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -23,7 +22,7 @@ class AccountService:
     async def get_all(page=1, page_size=20, is_active: bool | None = True):
         try:
             if page <= 0 or page_size <= 0:
-                ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+                ExceptionHelper.throw_bad_request("Invalid page or page size")
             return await sync_to_async(AccountRepo.all)(
                 page=page, page_size=page_size, is_active=is_active
             )
@@ -46,7 +45,7 @@ class AccountService:
                 return await sync_to_async(AccountRepo.find_by_username)(
                     username=username, is_active=is_active
                 )
-            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+            ExceptionHelper.throw_bad_request("Missing username")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
@@ -55,7 +54,7 @@ class AccountService:
         try:
             if AccountService.is_valid_email(email):
                 return await sync_to_async(AccountRepo.find_by_email)(email=email, is_active=is_active)
-            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+            ExceptionHelper.throw_bad_request("Invalid email")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
@@ -66,10 +65,10 @@ class AccountService:
             email = data.get("email")
 
             if await sync_to_async(AccountRepo.find_by_username)(username, None):
-                ExceptionHelper.throw_bad_request(ResponseMessages.ALREADY_EXISTS)
+                ExceptionHelper.throw_bad_request("account already exists")
 
             if await sync_to_async(AccountRepo.find_by_email)(email, None):
-                ExceptionHelper.throw_bad_request(ResponseMessages.ALREADY_EXISTS)
+                ExceptionHelper.throw_bad_request("account already exists")
 
             return await sync_to_async(AccountRepo.handle_create)(FieldsFilter(data=data, entity=Account))
         except Exception as e:
@@ -82,9 +81,9 @@ class AccountService:
             if account_id and str(account_id).strip() and any(data.values()):
                 account = await AccountService.get_by_id(account_id, None)
                 if not account:
-                    ExceptionHelper.throw_not_found(ResponseMessages.NOT_FOUND)
+                    ExceptionHelper.throw_not_found("Account not found")
                 return await sync_to_async(AccountRepo.handle_update)(account, FieldsFilter(data=data, entity=Account))
-            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+            ExceptionHelper.throw_bad_request("Missing account id")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
@@ -94,9 +93,9 @@ class AccountService:
             if account_id and str(account_id).strip():
                 account = await AccountService.get_by_id(account_id, None)
                 if not account:
-                    ExceptionHelper.throw_not_found(ResponseMessages.NOT_FOUND)
+                    ExceptionHelper.throw_not_found("Account not found")
                 return await sync_to_async(AccountRepo.handle_delete)(account)
-            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+            ExceptionHelper.throw_bad_request("Missing account id")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
@@ -106,9 +105,9 @@ class AccountService:
             if account_id and str(account_id).strip():
                 account = await AccountService.get_by_id(account_id, None)
                 if not account:
-                    ExceptionHelper.throw_not_found(ResponseMessages.NOT_FOUND)
+                    ExceptionHelper.throw_not_found("Account not found")
                 return await sync_to_async(AccountRepo.handle_hard_delete)(account)
-            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+            ExceptionHelper.throw_bad_request("Missing account id")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
     
