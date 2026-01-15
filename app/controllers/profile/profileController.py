@@ -1,9 +1,8 @@
 from django.views import View
 
-from app.dtos.profileDTOs import GetAllProfileDTO, GetProfileByIdDTO
+from app.dtos.profileDTOs import SearchProfilesDTO, GetProfileByIdDTO
 from app.enums.httpStatus import HttpStatus
 from app.mapping.profileMapping import ProfileMapping
-from app.services.accountService import AccountService
 from app.services.profileService import ProfileService
 from app.helpers.baseResponse import BaseResponse
 from app.helpers.exceptionHelper import ExceptionHelper
@@ -24,7 +23,7 @@ class ProfileController(View):
                     message="Get profile by id successfully",
                 )
             
-            search_profile_dto = GetAllProfileDTO(**raw_params)
+            search_profile_dto = SearchProfilesDTO(**raw_params)
 
             if search_profile_dto:
                 result = await ProfileService.search_profiles(search_profile_dto.model_dump())

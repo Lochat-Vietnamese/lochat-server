@@ -1,31 +1,15 @@
 from datetime import date
 from typing import Optional
 from uuid import UUID
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, HttpUrl
 from app.enums.provinces import Provinces
 from app.dtos.baseDTO import BaseDTO
-
-
-class GetAllProfileDTO(BaseDTO):
-    page: int = Field(
-        title="Current Page",
-        ge=1,
-        default=1, 
-        examples=1
-    )
-    page_size: int = Field(
-        title="Page Size",
-        ge=5,
-        lt=100,
-        default=10, 
-        examples=10
-    )
 
 class GetProfileByIdDTO(BaseDTO):
     profile_id: UUID = Field(
         title="Profile ID",
         example="123e4567-e89b-12d3-a456-426655440000",
-    ),
+    )
     
 class CreateProfileDTO(BaseDTO):
     nickname: str = Field(
@@ -45,14 +29,14 @@ class CreateProfileDTO(BaseDTO):
         examples="profile bio",
         default=None,
     )
-    avatar_url: str | None = Field(
+    avatar_url: HttpUrl | None = Field(
         title="avatar url",
         examples="https://example.com/avatar.jpg",
         default=None,
     )
     address: str | None = Field(
         title="address",
-        examples="example address",
+        examples="123 street a, ward b, city c",
         default=None,
     )
     hometown: Optional[str] | None = Field(
@@ -97,3 +81,31 @@ class CreateProfileDTO(BaseDTO):
         if value not in Provinces.values:
             raise ValueError("Invalid hometown")
         return value
+    
+    @field_validator("avatar_url", mode="after")
+    @classmethod
+    def parse_avatar_url(cls, value):
+        if value is None:
+            return value
+        return str(value)
+    
+class SearchProfilesDTO(CreateProfileDTO):
+    is_active: str | None = Field(
+        title="",
+        default=None,
+        example=""
+    )
+    page: int = Field(
+        title="Current Page",
+        ge=1,
+        default=1, 
+        examples=1
+    )
+    page_size: int = Field(
+        title="Page Size",
+        ge=5,
+        lt=100,
+        default=10, 
+        examples=10
+    )
+    
