@@ -10,15 +10,10 @@ class GetRelationByIdDTO(BaseDTO):
         title="Relation ID",
         example="123e4567-e89b-12d3-a456-426655440000",
     )
-    is_active: bool | None = Field(
-        title="Relation Activity Status",
-        default=None, 
-        examples=True
-    )
 
-    @field_validator("is_active", mode="before")
-    def parse_is_active(cls, input):
-        return ParseBool(input)
+    # @field_validator("is_active", mode="before")
+    # def parse_is_active(cls, input):
+    #     return ParseBool(input)
 
 class GetRelationByProfilesDTO(BaseDTO):
     first_profile_id: UUID = Field(

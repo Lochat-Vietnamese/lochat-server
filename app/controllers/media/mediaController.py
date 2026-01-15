@@ -2,6 +2,7 @@ from django.views import View
 
 from app.dtos.mediaDTOs import GetMediaByIdDTO, StorageMediaFilesDTO
 from app.enums.httpStatus import HttpStatus
+from app.enums.responseCodes import ResponseCodes
 from app.mapping.mediaMapping import MediaMapping
 from app.services.mediaService import MediaService
 from app.helpers.baseResponse import BaseResponse
@@ -18,7 +19,7 @@ class MediaController(View):
                 result = MediaService.get_by_id(media_id=media_dto.media_id)
                 return BaseResponse.success(
                     data=MediaMapping(result).data,
-                    code=HttpStatus.OK,
+                    code=ResponseCodes.GET_MEDIA_BY_ID_SUCCESS,
                     message="Get media by id successfully",
                 )
 
@@ -36,8 +37,8 @@ class MediaController(View):
             )
             return BaseResponse.success(
                 data=result,
-                code=HttpStatus.CREATED,
-                message="Store media files successfully",
+                code=ResponseCodes.STORAGE_MEDIA_SUCCESS,
+                message="Storage media files successfully",
             )
 
         except Exception as e:

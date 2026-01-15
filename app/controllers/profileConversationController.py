@@ -8,6 +8,7 @@ from app.helpers.exceptionHelper import ExceptionHelper
 from app.utils.parseBool import ParseBool
 from app.utils.requestData import RequestData
 
+# tách ra đem qua profile và conversation
 class ProfileConversationController(View):
     async def post(self, request, action=None):
         try:

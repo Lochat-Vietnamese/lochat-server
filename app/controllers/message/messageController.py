@@ -2,6 +2,7 @@ from django.views import View
 
 from app.dtos.messageDTOs import SearchMessagesDTO, GetMessageByIdDTO
 from app.enums.httpStatus import HttpStatus
+from app.enums.responseCodes import ResponseCodes
 from app.mapping.messageMapping import MessageMapping
 from app.services.messageService import MessageService
 from app.helpers.baseResponse import BaseResponse
@@ -17,7 +18,7 @@ class MessageController(View):
                 result = MessageService.get_by_id(message_id=message_dto.message_id)
                 return BaseResponse.success(
                     data=MessageMapping(result).data,
-                    code=HttpStatus.OK,
+                    code=ResponseCodes.GET_MESSAGE_BY_ID_SUCCESS,
                     message="Get message by id successfully",
                 )
             
@@ -28,8 +29,8 @@ class MessageController(View):
                 result = MessageService.get_last_conversation_message(conversation_id=search_data.conversation_id)
                 return BaseResponse.success(
                     data=MessageMapping(result).data,
-                    code=HttpStatus.OK,
-                    message="Get message by id successfully",
+                    code=ResponseCodes.GET_LAST_CONVERSATION_MESSAGE_SUCCESS,
+                    message="Get last conversation message successfully",
                 )
             
             # lam cai ham search tong de thay the (vua xu ly search vua get all)

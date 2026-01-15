@@ -2,6 +2,7 @@ from django.views import View
 
 from app.dtos.profileDTOs import SearchProfilesDTO, GetProfileByIdDTO
 from app.enums.httpStatus import HttpStatus
+from app.enums.responseCodes import ResponseCodes
 from app.mapping.profileMapping import ProfileMapping
 from app.services.profileService import ProfileService
 from app.helpers.baseResponse import BaseResponse
@@ -19,7 +20,7 @@ class ProfileController(View):
                 result = await ProfileService.get_by_id(get_by_id_dto.profile_id, is_active=True)
                 return BaseResponse.success(
                     data=ProfileMapping(result).data,
-                    code=HttpStatus.OK,
+                    code=ResponseCodes.GET_PROFILE_BY_ID_SUCCESS,
                     message="Get profile by id successfully",
                 )
             
@@ -29,7 +30,7 @@ class ProfileController(View):
                 result = await ProfileService.search_profiles(search_profile_dto.model_dump())
                 return BaseResponse.success(
                     data=ProfileMapping(result.get("content", []), many=True).data,
-                    code=HttpStatus.OK,
+                    code=ResponseCodes.SEARCH_PROFILE_SUCCESS,
                     message="Search profile successfully",
                     meta={
                         "page": result.get("page"),
@@ -45,7 +46,7 @@ class ProfileController(View):
             result["content"] = ProfileMapping(result.get("content", []), many=True).data
             return BaseResponse.success(
                 data=result,
-                code=HttpStatus.OK,
+                code=ResponseCodes.GET_ALL_PROFILES_SUCCESS,
                 message="Get all profile successfully"
             )
 

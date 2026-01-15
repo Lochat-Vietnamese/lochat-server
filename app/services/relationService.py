@@ -23,9 +23,9 @@ class RelationService:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def get_by_id(dto: GetRelationByIdDTO):
+    async def get_by_id(relation_id: str, is_active: bool | None = True):
         try:
-            return await sync_to_async(RelationRepo.find_by_id)(relation_id=dto.relation_id, is_active=dto.is_active)
+            return await sync_to_async(RelationRepo.find_by_id)(relation_id=relation_id, is_active=is_active)
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
