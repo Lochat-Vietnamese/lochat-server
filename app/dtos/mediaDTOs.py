@@ -2,8 +2,6 @@ import os
 from typing import List
 from uuid import UUID
 from pydantic import Field, field_validator
-from app.enums.responseMessages import ResponseMessages
-from app.helpers.exceptionHelper import ExceptionHelper
 from app.dtos.baseDTO import BaseDTO
 from django.core.files.uploadedfile import UploadedFile
 
@@ -30,13 +28,13 @@ class StorageMediaFilesDTO(BaseDTO):
     @field_validator("files")
     def validate_files(cls, files):
         if not files:
-            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+            raise ValueError("Missing files")
 
         for f in files:
             if not isinstance(f, UploadedFile):
-                ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+                raise ValueError("Invalid file type")
 
             if f.size > os.getenv("MAXIMUM_UPLOAD_MB") * 1024 * 1024:
-                ExceptionHelper.throw_bad_request(ResponseMessages.FILE_TOO_LARGE)
+                raise ValueError("File too large")
 
         return files

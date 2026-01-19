@@ -1,6 +1,5 @@
 from uuid import UUID
-from pydantic import Field, field_validator
-from app.utils.parseBool import ParseBool
+from pydantic import Field
 from app.dtos.baseDTO import BaseDTO
 
 

@@ -136,3 +136,15 @@ class MessageService:
             return MessageRepo.find_by_conversation(conversation=conversation, page=page, page_size=page_size, is_active=is_active)
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
+    
+    @staticmethod
+    async def search_messages(search_data: Dict):
+        try:
+            page = search_data.get("page")
+            page_size = search_data.get("page_size")
+            if page <= 0 or page_size <= 0:
+                ExceptionHelper.throw_bad_request("Invalid page or page size")
+
+            return await sync_to_async(MessageRepo.handle_search_messages)(search_data=search_data, page=page, page_size=page_size)
+        except Exception as e:
+            ExceptionHelper.handle_caught_exception(error=e)

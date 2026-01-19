@@ -4,6 +4,9 @@ from app.entities.profileConversation import ProfileConversation
 from app.enums.messageTypes import MessageTypes
 from app.entities.message import Message
 from django.core.paginator import Paginator
+from django.db.models import Q
+
+from app.utils.fieldsFilter import FieldsFilter
 
 
 class MessageRepo:
@@ -144,6 +147,31 @@ class MessageRepo:
                 queryset = Message.objects.select_related("conversation", "sender", "media").filter(conversation=conversation).order_by("-created_at")
             else:
                 queryset = Message.objects.select_related("conversation", "sender", "media").filter(conversation=conversation, is_active=is_active).order_by("-created_at")
+
+            paginator = Paginator(queryset, page_size)
+            items = paginator.page(page)
+
+            return {
+                "pages": paginator.num_pages,
+                "current": items.number,
+                "content": list(items),
+            }
+        except Exception as e:
+            raise e
+        
+    @staticmethod
+    def handle_search_messages(
+        search_data: dict,
+        page: int = 1,
+        page_size: int = 20,
+    ):
+        try:
+            data = FieldsFilter(data=search_data, entity=Message)
+            filters = Q()
+            for field, value in data.items():
+                filters &= Q(**{field: value})
+
+            queryset = Message.objects.filter(filters).order_by("-created_at")
 
             paginator = Paginator(queryset, page_size)
             items = paginator.page(page)

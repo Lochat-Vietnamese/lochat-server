@@ -1,7 +1,6 @@
 from django.views import View
 
 from app.dtos.messageDTOs import SearchMessagesDTO, GetMessageByIdDTO
-from app.enums.httpStatus import HttpStatus
 from app.enums.responseCodes import ResponseCodes
 from app.mapping.messageMapping import MessageMapping
 from app.services.messageService import MessageService
@@ -23,28 +22,30 @@ class MessageController(View):
                 )
             
             data = RequestData(request=request)
-            search_data = SearchMessagesDTO(**data)
+            search_messages_dto = SearchMessagesDTO(**data)
 
-            if search_data.get_last == True:
-                result = MessageService.get_last_conversation_message(conversation_id=search_data.conversation_id)
+            if search_messages_dto.get_last == True:
+                result = MessageService.get_last_conversation_message(conversation_id=search_messages_dto.conversation_id)
                 return BaseResponse.success(
                     data=MessageMapping(result).data,
                     code=ResponseCodes.GET_LAST_CONVERSATION_MESSAGE_SUCCESS,
                     message="Get last conversation message successfully",
                 )
             
-            # lam cai ham search tong de thay the (vua xu ly search vua get all)
-            result = MessageService.get_by_conversation(
-                conversation_id=search_data.conversation_id,
-                page=search_data.page,
-                page_size=search_data.page_size,
-                is_active=search_data.is_active
+            result = await MessageService.search_messages(search_messages_dto.model_dump())
+            return BaseResponse.success(
+                data=MessageMapping(result.get("content", []), many=True).data,
+                code=ResponseCodes.SEARCH_PROFILE_SUCCESS,
+                message="Search profile successfully",
+                meta={
+                    "page": result.get("page"),
+                    "page_size": result.get("page_size"),
+                    # "total_pages": result.get("total_pages"),
+                    # "total_items": result.get("total_items"),
+                    # "has_next": result.get("has_next"),
+                    # "has_prev": result.get("has_prev"),
+                }
             )
-            
-            result["content"] = MessageMapping(
-                result.get("content", []), many=True
-            ).data
-            return BaseResponse.success(data=result)            
-        
+           
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
