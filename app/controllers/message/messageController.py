@@ -21,8 +21,19 @@ class MessageController(View):
                     message="Get message by id successfully",
                 )
             
-            data = RequestData(request=request)
-            search_messages_dto = SearchMessagesDTO(**data)
+            raw_data = RequestData(request=request)
+            search_messages_dto = SearchMessagesDTO(**raw_data)
+
+            if search_messages_dto.is_only_pagination():
+                result = await MessageService.get_all(page=search_messages_dto.page, page_size=search_messages_dto.page_size, is_active=search_messages_dto.is_active)
+                return BaseResponse.success(
+                    data=MessageMapping(result.get("data", []), many=True).data,
+                    code=ResponseCodes.SEARCH_PROFILE_SUCCESS,
+                    message="Search profile successfully",
+                    page=result.get("page"),
+                    page_size=result.get("page_size"),
+                    total_items=result.get("total_items"),
+                )
 
             if search_messages_dto.get_last == True:
                 result = MessageService.get_last_conversation_message(conversation_id=search_messages_dto.conversation_id)
@@ -34,17 +45,12 @@ class MessageController(View):
             
             result = await MessageService.search_messages(search_messages_dto.model_dump())
             return BaseResponse.success(
-                data=MessageMapping(result.get("content", []), many=True).data,
+                data=MessageMapping(result.get("data", []), many=True).data,
                 code=ResponseCodes.SEARCH_PROFILE_SUCCESS,
                 message="Search profile successfully",
-                meta={
-                    "page": result.get("page"),
-                    "page_size": result.get("page_size"),
-                    # "total_pages": result.get("total_pages"),
-                    # "total_items": result.get("total_items"),
-                    # "has_next": result.get("has_next"),
-                    # "has_prev": result.get("has_prev"),
-                }
+                page=result.get("page"),
+                page_size=result.get("page_size"),
+                total_items=result.get("total_items"),
             )
            
         except Exception as e:

@@ -12,8 +12,21 @@ class BaseResponse:
         code: str = ResponseCodes.SUCCESS,
         message: str = "Success",
         data: Dict | List | None = None,
-        meta: Dict | None = None,
+        page: int | None = None,
+        page_size: int | None = None,
+        total_items: int | None = None,
     ):
+        total_pages = (total_items + page_size - 1) // page_size
+
+        meta = {
+            "page": page,
+            "page_size": page_size,
+            "total_pages": total_pages,
+            "total_items": total_items,
+            "has_next": page < total_pages,
+            "has_prev": page > 1,
+        }
+
         payload = {
             "code": code,
             "message": message,
@@ -26,7 +39,7 @@ class BaseResponse:
             status=status_code,
             json_dumps_params={"ensure_ascii": False},
         )
-
+   
     @staticmethod
     def error(
         *,
