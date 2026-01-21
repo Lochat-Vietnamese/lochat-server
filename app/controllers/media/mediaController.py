@@ -1,7 +1,6 @@
 from django.views import View
 
 from app.dtos.mediaDTOs import GetMediaByIdDTO, StorageMediaFilesDTO
-from app.enums.httpStatus import HttpStatus
 from app.enums.responseCodes import ResponseCodes
 from app.mapping.mediaMapping import MediaMapping
 from app.services.mediaService import MediaService

@@ -19,7 +19,11 @@ class RestockToken(View):
                 result = await AccountService.restock_token(refresh_token)
                 account = AccountMapping(result.get("account")).data
                 return CookieHelper.attach(
-                    response=BaseResponse.success(data=account, code=ResponseCodes.RESTOCK_TOKEN_SUCCESS, message="Restock token successfully"), 
+                    response=BaseResponse.success(
+                        data=account, 
+                        code=ResponseCodes.RESTOCK_TOKEN_SUCCESS, 
+                        message="Restock token successfully"
+                    ), 
                     cookies={
                         "access_token": {
                             "value": result.get("access_token"),

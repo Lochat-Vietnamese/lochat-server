@@ -108,4 +108,11 @@ class SearchProfilesDTO(CreateProfileDTO):
         default=10, 
         examples=10
     )
-    
+    @classmethod
+    def is_only_pagination(self):
+        pagination_fields = {"page", "page_size", "is_active"}
+
+        for field_name, value in self.model_dump().items():
+            if field_name not in pagination_fields and value is not None:
+                return False
+        return True

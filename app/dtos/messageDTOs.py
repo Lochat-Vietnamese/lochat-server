@@ -71,7 +71,7 @@ class SearchMessagesDTO(BaseDTO):
     def parse_is_active(cls, input):
         return ParseBool(input)
     
-    @field_validator("hometown")
+    @field_validator("type")
     @classmethod
     def validate_message_type(cls, value: str | None):
         if value is None:

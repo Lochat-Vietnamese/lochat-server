@@ -123,9 +123,10 @@ class ProfileRepo:
             items = paginator.page(page)
 
             return {
-                "pages": paginator.num_pages,
-                "current": items.number,
-                "content": list(items),
+                "page": items.number,
+                "page_size": page_size,
+                "total_items": paginator.count,
+                "data": list(items),
             }
         except Exception as e:
             raise e

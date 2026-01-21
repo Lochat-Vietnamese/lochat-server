@@ -10,10 +10,12 @@ from app.utils.fieldsFilter import FieldsFilter
 
 class ProfileService:
     @staticmethod
-    async def get_all(dto: GetAllProfileDTO):
+    async def get_all(page: int = 1, page_size: int = 20, is_active: bool | None = True):
         try:
-            # fix
-            return await sync_to_async(ProfileRepo.all)(page=dto.page, page_size=dto.page_size, is_active=True)
+            if page <= 0 or page_size <= 0:
+                ExceptionHelper.throw_bad_request("Invalid page or page size")
+
+            return await sync_to_async(ProfileRepo.all)(page=page, page_size=page_size, is_active=True)
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 

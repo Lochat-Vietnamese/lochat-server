@@ -17,7 +17,12 @@ class SignUp(View):
             sign_up_dto = SignUpDTO(**raw_data)
 
             result = await AccountService.sign_up(sign_up_dto.model_dump())
-            return BaseResponse.success(data=AccountMapping(result).data, code=ResponseCodes.SIGN_UP_SUCCESS, message="Sign up successfully", status_code=HttpStatus.CREATED)
+            return BaseResponse.success(
+                data=AccountMapping(result).data, 
+                code=ResponseCodes.SIGN_UP_SUCCESS, 
+                message="Sign up successfully", 
+                status_code=HttpStatus.CREATED
+            )
 
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
