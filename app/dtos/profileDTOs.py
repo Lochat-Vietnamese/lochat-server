@@ -73,7 +73,7 @@ class CreateProfileDTO(BaseDTO):
             raise ValueError("User must be at least 14 years old")
         return value
     
-    @field_validator("hometown")
+    @field_validator("hometown", mode="before")
     @classmethod
     def validate_hometown(cls, value: str | None):
         if value is None:

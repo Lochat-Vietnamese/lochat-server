@@ -29,8 +29,8 @@ class ProfileController(View):
                 result = await ProfileService.get_all(page=search_profile_dto.page, page_size=search_profile_dto.page_size, is_active=search_profile_dto.is_active)
                 return BaseResponse.success(
                     data=ProfileMapping(result.get("data", []), many=True).data,
-                    code=ResponseCodes.SEARCH_PROFILE_SUCCESS,
-                    message="Search profile successfully",
+                    code=ResponseCodes.GET_ALL_PROFILES_SUCCESS,
+                    message="Get all profile successfully",
                     page=result.get("page"),
                     page_size=result.get("page_size"),
                     total_items=result.get("total_items"),
