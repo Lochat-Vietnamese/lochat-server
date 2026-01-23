@@ -46,7 +46,7 @@ class ProfileConversationService:
     ):
         try:
             if page <= 0 or page_size <= 0:
-                ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+                ExceptionHelper.throw_bad_request("Invalid page or page size")
             if account_id and str(account_id).strip():
                 account = await AccountService.get_by_id(account_id=account_id)
                 profile = account.profile if account else None
@@ -56,7 +56,7 @@ class ProfileConversationService:
                     page_size=page_size,
                     is_active=is_active,
                 )
-            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+            ExceptionHelper.throw_bad_request("Invalid account id")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 

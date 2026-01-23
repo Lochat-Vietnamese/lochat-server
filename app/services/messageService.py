@@ -30,42 +30,7 @@ class MessageService:
             return await sync_to_async(MessageRepo.find_by_id)(message_id=message_id, is_active=is_active)
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
-
-    @staticmethod
-    async def get_by_sender(sender_id: str, page: int = 1, page_size: int = 20, is_active: bool | None = True):
-        try:
-            if page <= 0 or page_size <= 0:
-                ExceptionHelper.throw_bad_request("Invalid page or page size")
-            if sender_id and str(sender_id).strip():
-                profileConversation = await ProfileConversationService.get_by_id(sender_id, is_active)
-                if profileConversation:
-                    return await sync_to_async(MessageRepo.find_by_sender)(uploader=profileConversation, page=page, page_size=page_size, is_active=is_active)
-            ExceptionHelper.throw_bad_request("Invalid sender id")
-        except Exception as e:
-            ExceptionHelper.handle_caught_exception(error=e)
-        
-    @staticmethod
-    async def get_by_type(message_type: MessageTypes, page: int = 1, page_size: int = 20, is_active: bool | None = True):
-        try:
-            if page <= 0 or page_size <= 0:
-                ExceptionHelper.throw_bad_request("Invalid page or page size")
-            if message_type:
-                return await sync_to_async(MessageRepo.find_by_type)(type=message_type, page=page, page_size=page_size, is_active=is_active)
-            ExceptionHelper.throw_bad_request("Invalid message type")
-        except Exception as e:
-            ExceptionHelper.handle_caught_exception(error=e)
-    
-    @staticmethod
-    async def get_by_reply(reply_id: str, page: int = 1, page_size: int = 20, is_active: bool | None = True):
-        try:
-            if page <= 0 or page_size <= 0:
-                ExceptionHelper.throw_bad_request("Invalid page or page size")
-            if reply_id and str(reply_id).strip():
-                return await sync_to_async(MessageRepo.find_by_reply)(reply=uuid.UUID(reply_id), page=page, page_size=page_size, is_active=is_active)
-            ExceptionHelper.throw_bad_request("Invalid reply id")
-        except Exception as e:
-            ExceptionHelper.handle_caught_exception(error=e)
-
+            
     @staticmethod
     async def create(data: Dict):
         try:

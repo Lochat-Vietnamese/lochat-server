@@ -27,21 +27,6 @@ class ProfileService:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def get_by_nickname(
-        nickname: str, page=1, page_size=20, is_active: bool | None = True
-    ):
-        try:
-            if page <= 0 or page_size <= 0:
-                ExceptionHelper.throw_bad_request("Invalid page or page size")
-            if not nickname: 
-                ExceptionHelper.throw_bad_request("Missing nickname")
-            return await sync_to_async(ProfileRepo.find_by_nickname)(
-                nickname, page, page_size, is_active
-            )
-        except Exception as e:
-            ExceptionHelper.handle_caught_exception(error=e)
-
-    @staticmethod
     async def get_by_phone_number(phone_number: str, is_active: bool | None = True):
         try:
             if phone_number and str(phone_number).strip():

@@ -116,3 +116,27 @@ class SearchProfilesDTO(CreateProfileDTO):
             if field_name not in pagination_fields and value is not None:
                 return False
         return True
+    
+class GetProfileConversationsDTO(BaseDTO):
+    account_id: UUID = Field(
+        title="Profile ID",
+        example="123e4567-e89b-12d3-a456-426655440000",
+    )
+    is_active: str | None = Field(
+        title="",
+        default=None,
+        example=""
+    )
+    page: int = Field(
+        title="Current Page",
+        ge=1,
+        default=1, 
+        examples=1
+    )
+    page_size: int = Field(
+        title="Page Size",
+        ge=5,
+        lt=100,
+        default=10, 
+        examples=10
+    )
