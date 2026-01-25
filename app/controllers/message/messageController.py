@@ -14,7 +14,7 @@ class MessageController(View):
         try:
             if message_id:
                 message_dto = GetMessageByIdDTO(message_id=message_id)
-                result = MessageService.get_by_id(message_id=message_dto.message_id)
+                result = await MessageService.get_by_id(message_id=message_dto.message_id)
                 return BaseResponse.success(
                     data=MessageMapping(result).data,
                     code=ResponseCodes.GET_MESSAGE_BY_ID_SUCCESS,
@@ -36,7 +36,7 @@ class MessageController(View):
                 )
 
             if search_messages_dto.get_last == True:
-                result = MessageService.get_last_conversation_message(conversation_id=search_messages_dto.conversation_id)
+                result = await MessageService.get_last_conversation_message(conversation_id=search_messages_dto.conversation_id)
                 return BaseResponse.success(
                     data=MessageMapping(result).data,
                     code=ResponseCodes.GET_LAST_CONVERSATION_MESSAGE_SUCCESS,

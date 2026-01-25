@@ -15,7 +15,7 @@ class MediaController(View):
             if media_id:
                 media_dto = GetMediaByIdDTO(media_id=media_id)
 
-                result = MediaService.get_by_id(media_id=media_dto.media_id)
+                result = await MediaService.get_by_id(media_id=media_dto.media_id)
                 return BaseResponse.success(
                     data=MediaMapping(result).data,
                     code=ResponseCodes.GET_MEDIA_BY_ID_SUCCESS,

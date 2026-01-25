@@ -4,7 +4,6 @@ from typing import Dict
 from app.repositories.messageRepo import MessageRepo
 from app.services.conversationService import ConversationService
 from app.services.profileConversationService import ProfileConversationService
-from app.enums.messageTypes import MessageTypes
 from asgiref.sync import sync_to_async
 
 from app.helpers.exceptionHelper import ExceptionHelper
@@ -102,8 +101,8 @@ class MessageService:
     @staticmethod
     async def search_messages(search_data: Dict):
         try:
-            page = search_data.get("page")
-            page_size = search_data.get("page_size")
+            page = search_data.pop("page")
+            page_size = search_data.pop("page_size")
             if page <= 0 or page_size <= 0:
                 ExceptionHelper.throw_bad_request("Invalid page or page size")
 

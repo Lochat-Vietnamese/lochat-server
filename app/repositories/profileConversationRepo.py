@@ -4,8 +4,10 @@ from app.entities.profileConversation import ProfileConversation
 from app.entities.profile import Profile
 from app.entities.conversation import Conversation
 from django.core.paginator import Paginator
+from django.db.models import Q
 
 from app.enums.conversationTypes import ConversationTypes
+from app.utils.fieldsFilter import FieldsFilter
 
 
 class ProfileConversationRepo:
@@ -155,5 +157,31 @@ class ProfileConversationRepo:
                 else:
                     list_common = [ac.conversation for ac in common_conversations if ac.is_active == is_active and ac.conversation.type == type]
             return list_common
+        except Exception as e:
+            raise e
+        
+    @staticmethod
+    def handle_search_memberships(
+        search_data: dict,
+        page: int = 1,
+        page_size: int = 20,
+    ):
+        try:
+            data = FieldsFilter(data=search_data, entity=ProfileConversation)
+            filters = Q()
+            for field, value in data.items():
+                filters &= Q(**{field: value})
+
+            queryset = Profile.objects.filter(filters).order_by("-created_at")
+
+            paginator = Paginator(queryset, page_size)
+            items = paginator.page(page)
+
+            return {
+                "page": items.number,
+                "page_size": page_size,
+                "total_items": paginator.count,
+                "data": list(items),
+            }
         except Exception as e:
             raise e

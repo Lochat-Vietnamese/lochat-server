@@ -86,8 +86,8 @@ class ProfileService:
     @staticmethod
     async def search_profiles(search_data: Dict):
         try:
-            page = search_data.get("page")
-            page_size = search_data.get("page_size")
+            page = search_data.pop("page")
+            page_size = search_data.pop("page_size")
             if page <= 0 or page_size <= 0:
                 ExceptionHelper.throw_bad_request("Invalid page or page size")
 

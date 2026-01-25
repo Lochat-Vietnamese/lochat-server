@@ -2,7 +2,6 @@ import uuid
 from typing import Dict
 from app.entities.profileConversation import ProfileConversation
 from app.enums.conversationTypes import ConversationTypes
-from app.enums.responseMessages import ResponseMessages
 from app.repositories.profileConversationRepo import ProfileConversationRepo
 from app.services.accountService import AccountService
 from app.services.profileService import ProfileService
@@ -18,7 +17,7 @@ class ProfileConversationService:
     async def get_all(page=1, page_size=20, is_active: bool | None = True):
         try:
             if page <= 0 or page_size <= 0:
-                ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+                ExceptionHelper.throw_bad_request("Invalid page or page size")
             return await sync_to_async(ProfileConversationRepo.all)(
                 page=page, page_size=page_size, is_active=is_active
             )
@@ -33,7 +32,7 @@ class ProfileConversationService:
                 return await sync_to_async(ProfileConversationRepo.find_by_id)(
                     profileConversation_id=uuid_obj, is_active=is_active
                 )
-            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+            ExceptionHelper.throw_bad_request("Invalid profileConversation id")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
@@ -69,7 +68,7 @@ class ProfileConversationService:
     ):
         try:
             if page <= 0 or page_size <= 0:
-                ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+                ExceptionHelper.throw_bad_request("Invalid page or page size")
             if conversation_id and str(conversation_id).strip():
                 conversation = await ConversationService.get_by_id(conversation_id)
                 return await sync_to_async(ProfileConversationRepo.find_by_conversation)(
@@ -78,7 +77,7 @@ class ProfileConversationService:
                     page_size=page_size,
                     is_active=is_active,
                 )
-            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+            ExceptionHelper.throw_bad_request("Invalid conversation id")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
@@ -90,7 +89,7 @@ class ProfileConversationService:
             if not (profile_id or conversation_id) or not (
                 str(profile_id).strip() or str(conversation_id).strip()
             ):
-                ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+                ExceptionHelper.throw_bad_request("Missing required fields")
 
             profile = await ProfileService.get_by_id(
                 profile_id=profile_id, is_active=True
@@ -125,7 +124,7 @@ class ProfileConversationService:
                     ProfileConversation,
                     FieldsFilter(data=data, entity=ProfileConversation),
                 )
-            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+            ExceptionHelper.throw_bad_request("Invalid profileConversation id")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
@@ -140,7 +139,7 @@ class ProfileConversationService:
                 return await sync_to_async(ProfileConversationRepo.handle_delete)(
                     profileConversation
                 )
-            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+            ExceptionHelper.throw_bad_request("Invalid profileConversation id")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
@@ -155,7 +154,7 @@ class ProfileConversationService:
                 return await sync_to_async(ProfileConversationRepo.handle_hard_delete)(
                     ProfileConversation=profileConversation
                 )
-            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+            ExceptionHelper.throw_bad_request("Invalid profileConversation id")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
@@ -189,7 +188,7 @@ class ProfileConversationService:
                     return await sync_to_async(ProfileConversationRepo.find_by_both)(
                         profile=profile, conversation=conversation, is_active=is_active
                     )
-            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+            ExceptionHelper.throw_bad_request("Invalid profile or conversation id")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
@@ -199,5 +198,17 @@ class ProfileConversationService:
             return await sync_to_async(
                 ProfileConversationRepo.handle_update_last_accessed
             )(currentPC)
+        except Exception as e:
+            ExceptionHelper.handle_caught_exception(error=e)
+
+    @staticmethod
+    async def search_memberships(search_data: Dict):
+        try:
+            page = search_data.pop("page")
+            page_size = search_data.pop("page_size")
+            if page <= 0 or page_size <= 0:
+                ExceptionHelper.throw_bad_request("Invalid page or page size")
+
+            return await sync_to_async(ProfileConversationRepo.handle_search_memberships)(search_data=search_data, page=page, page_size=page_size)
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
