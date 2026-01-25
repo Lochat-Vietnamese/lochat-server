@@ -20,6 +20,13 @@ from app.controllers.auth.logout import Logout
 from app.controllers.auth.restockToken import RestockToken
 from app.controllers.auth.signUp import SignUp
 from app.controllers.auth.signIn import SignIn
+from app.controllers.conversation.conversationController import ConversationController
+from app.controllers.media.mediaController import MediaController
+from app.controllers.membership.membershipController import MembershipController
+from app.controllers.message.messageController import MessageController
+from app.controllers.profile.profileController import ProfileController
+from app.controllers.profile.profileConversationsController import ProfileConversationsController
+from app.controllers.relation.relationController import RelationController
 
 urlpatterns = [
     path('signin/', SignIn.as_view(), name='login'),
@@ -28,4 +35,11 @@ urlpatterns = [
     path('restock-token/', RestockToken.as_view(), name='restock-token'),
 
     path('accounts/<uuid:account_id>/', AccountController.as_view(), name='accounts'),
+    path('conversations/<uuid:conversation_id>/', ConversationController.as_view(), name='conversations'),
+    path('medias/<uuid:media_id>/', MediaController.as_view(), name='medias'),
+    path('memberships/<uuid:membership_id>/', MembershipController.as_view(), name='memberships'),
+    path('messages/<uuid:message_id>/', MessageController.as_view(), name='messages'),
+    path('profiles/<uuid:profile_id>/', ProfileController.as_view(), name='profiles'),
+    path('profiles/<uuid:profile_id>/conversations/', ProfileConversationsController.as_view(), name='profiles-conversations'),
+    path('relations/<uuid:relation_id>/', RelationController.as_view(), name='relations'),
 ]

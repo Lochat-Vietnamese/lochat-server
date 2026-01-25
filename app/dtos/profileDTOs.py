@@ -118,7 +118,7 @@ class SearchProfilesDTO(CreateProfileDTO):
         return True
     
 class GetProfileConversationsDTO(BaseDTO):
-    account_id: UUID = Field(
+    profile_id: UUID = Field(
         title="Profile ID",
         example="123e4567-e89b-12d3-a456-426655440000",
     )

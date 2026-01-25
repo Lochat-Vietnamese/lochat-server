@@ -37,8 +37,8 @@ class ProfileConversationService:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def get_by_account(
-        account_id: str,
+    async def get_by_profile(
+        profile_id: str,
         page: int = 1,
         page_size: int = 20,
         is_active: bool | None = True,
@@ -46,16 +46,17 @@ class ProfileConversationService:
         try:
             if page <= 0 or page_size <= 0:
                 ExceptionHelper.throw_bad_request("Invalid page or page size")
-            if account_id and str(account_id).strip():
-                account = await AccountService.get_by_id(account_id=account_id)
-                profile = account.profile if account else None
-                return await sync_to_async(ProfileConversationRepo.find_by_profile)(
-                    profile=profile,
-                    page=page,
-                    page_size=page_size,
-                    is_active=is_active,
-                )
-            ExceptionHelper.throw_bad_request("Invalid account id")
+            profile = await ProfileService.get_by_id(profile_id=profile_id)
+
+            if not profile:
+                ExceptionHelper.throw_bad_request("Invalid profile id")
+                
+            return await sync_to_async(ProfileConversationRepo.find_by_profile)(
+                profile=profile,
+                page=page,
+                page_size=page_size,
+                is_active=is_active,
+            )
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
