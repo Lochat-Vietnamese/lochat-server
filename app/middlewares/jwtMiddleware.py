@@ -21,10 +21,12 @@ class JwtMiddleware:
         try:
             access_token = AccessToken(rawAccessToken)
             user_id = access_token.get("user_id")
-            if not user_id:
+            profile_id = access_token.get("profile_id")
+            if not user_id or not profile_id:
                 ExceptionHelper.throw_unauthorized(message="Invalid token")
 
-            request.logging_in_account = user_id
+            request.user_id = user_id
+            request.logging_in_profile = profile_id
             request.access_token = rawAccessToken
         except (TokenError, InvalidToken):
             ExceptionHelper.throw_unauthorized(message="Invalid token")

@@ -129,6 +129,7 @@ class AccountService:
 
             if account and check_password(password, account.password):
                 refresh = RefreshToken.for_user(account)
+                refresh["profile_id"] = account.profile.id
                 rd = await RedisClient.instance()
                 await rd.add(
                     key=f"token_{account.id}",

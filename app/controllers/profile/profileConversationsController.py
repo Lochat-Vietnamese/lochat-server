@@ -15,13 +15,13 @@ class ProfileConversationsController(View):
             if not profile_id:
                 ExceptionHelper.throw_bad_request("Missing profile id")
                 
-            logging_in_id = str(request.user_id)
+            logging_in_profile_id = str(request.logging_in_profile)
 
             raw_data = RequestData(request=request)
             raw_data["profile_id"] = profile_id
             get_conversations_dto = GetProfileConversationsDTO(**raw_data)
 
-            if get_conversations_dto.profile_id != logging_in_id:
+            if get_conversations_dto.profile_id != logging_in_profile_id:
                 return BaseResponse.error(
                     code=ResponseCodes.PERMISSION_DENIED,
                     message="permission denied",
