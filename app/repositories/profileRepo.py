@@ -1,6 +1,8 @@
 import uuid
 from django.core.paginator import Paginator
 from app.entities.profile import Profile
+from app.utils.fieldsFilter import FieldsFilter
+from django.db.models import Q
 
 
 class ProfileRepo:
@@ -17,9 +19,10 @@ class ProfileRepo:
             items = paginator.page(page)
 
             return {
-                "pages": paginator.num_pages,
-                "current": items.number,
-                "content": list(items),
+                "page": items.number,
+                "page_size": page_size,
+                "total_items": paginator.count,
+                "data": list(items),
             }
         except Exception as e:
             raise e
@@ -32,29 +35,6 @@ class ProfileRepo:
             return Profile.objects.get(id=profile_id, is_active=is_active)
         except Profile.DoesNotExist:
             return None
-        except Exception as e:
-            raise e
-
-    @staticmethod
-    def find_by_nickname(nickname: str, page: int, page_size: int, is_active: bool | None):
-        try:
-            if is_active is None:
-                queryset = Profile.objects.filter(
-                    nickname__icontains=nickname
-                ).order_by("nickname")
-            else:
-                queryset = Profile.objects.filter(
-                    nickname__icontains=nickname, is_active=is_active
-                ).order_by("nickname")
-
-            paginator = Paginator(queryset, page_size)
-            items = paginator.page(page)
-
-            return {
-                "pages": paginator.num_pages,
-                "current": items.number,
-                "content": list(items),
-            }
         except Exception as e:
             raise e
 
@@ -100,5 +80,31 @@ class ProfileRepo:
         try:
             profile.delete()
             return True
+        except Exception as e:
+            raise e
+        
+    @staticmethod
+    def handle_search_profiles(
+        search_data: dict,
+        page: int = 1,
+        page_size: int = 20,
+    ):
+        try:
+            data = FieldsFilter(data=search_data, entity=Profile)
+            filters = Q()
+            for field, value in data.items():
+                filters &= Q(**{field: value})
+
+            queryset = Profile.objects.filter(filters).order_by("-created_at")
+
+            paginator = Paginator(queryset, page_size)
+            items = paginator.page(page)
+
+            return {
+                "page": items.number,
+                "page_size": page_size,
+                "total_items": paginator.count,
+                "data": list(items),
+            }
         except Exception as e:
             raise e

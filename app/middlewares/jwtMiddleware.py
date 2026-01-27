@@ -1,9 +1,7 @@
 from django.conf import settings
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
-from app.enums.responseMessages import ResponseMessages
-from app.utils.baseResponse import BaseResponse
-from app.utils.exceptionHelper import ExceptionHelper
+from app.helpers.exceptionHelper import ExceptionHelper
 
 
 class JwtMiddleware:
@@ -18,17 +16,19 @@ class JwtMiddleware:
         rawAccessToken = request.COOKIES.get("access_token")
             
         if not rawAccessToken:    
-            ExceptionHelper.throw_unauthorized(message=ResponseMessages.MISSING_TOKEN)
+            ExceptionHelper.throw_unauthorized(message="Missing access token")
 
         try:
             access_token = AccessToken(rawAccessToken)
             user_id = access_token.get("user_id")
-            if not user_id:
-                ExceptionHelper.throw_unauthorized(message=ResponseMessages.INVALID_TOKEN)
+            profile_id = access_token.get("profile_id")
+            if not user_id or not profile_id:
+                ExceptionHelper.throw_unauthorized(message="Invalid token")
 
             request.user_id = user_id
+            request.logging_in_profile = profile_id
             request.access_token = rawAccessToken
         except (TokenError, InvalidToken):
-            ExceptionHelper.throw_unauthorized(message=ResponseMessages.EXPIRED_TOKEN)
+            ExceptionHelper.throw_unauthorized(message="Invalid token")
 
         return self.get_response(request)

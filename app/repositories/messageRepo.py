@@ -4,6 +4,9 @@ from app.entities.profileConversation import ProfileConversation
 from app.enums.messageTypes import MessageTypes
 from app.entities.message import Message
 from django.core.paginator import Paginator
+from django.db.models import Q
+
+from app.utils.fieldsFilter import FieldsFilter
 
 
 class MessageRepo:
@@ -19,9 +22,10 @@ class MessageRepo:
             items = paginator.page(page)
 
             return {
-                "pages": paginator.num_pages,
-                "current": items.number,
-                "content": list(items),
+                "page": items.number,
+                "page_size": page_size,
+                "total_items": paginator.count,
+                "data": list(items),
             }
         except Exception as e:
             raise e
@@ -36,64 +40,7 @@ class MessageRepo:
             return None
         except Exception as e:
             raise e
-        
-    @staticmethod
-    def find_by_sender(sender: ProfileConversation, page: int, page_size: int, is_active: bool | None):
-        try:
-            if is_active is None:
-                queryset = Message.objects.select_related("conversation", "sender", "media").filter(sender=sender).order_by("-created_at")
-            else:
-                queryset = Message.objects.select_related("conversation", "sender", "media").filter(sender=sender, is_active=is_active).order_by("-created_at")
-
-            paginator = Paginator(queryset, page_size)
-            items = paginator.page(page)
-
-            return {
-                "pages": paginator.num_pages,
-                "current": items.number,
-                "content": list(items),
-            }
-        except Exception as e:
-            raise e
-        
-    @staticmethod
-    def find_by_type(type: MessageTypes, page: int, page_size: int, is_active: bool | None):
-        try:
-            if is_active is None:
-                queryset = Message.objects.select_related("conversation", "sender", "media").filter(type=type).order_by("-created_at")
-            else:
-                queryset = Message.objects.select_related("conversation", "sender", "media").filter(type=type, is_active=is_active).order_by("-created_at")
-
-            paginator = Paginator(queryset, page_size)
-            items = paginator.page(page)
-
-            return {
-                "pages": paginator.num_pages,
-                "current": items.number,
-                "content": list(items),
-            }
-        except Exception as e:
-            raise e
-        
-    @staticmethod
-    def find_by_reply(reply: uuid.UUID, page: int, page_size: int, is_active: bool | None):
-        try:
-            if is_active is None:
-                queryset = Message.objects.select_related("conversation", "sender", "media").filter(reply=reply).order_by("-created_at")
-            else:
-                queryset = Message.objects.select_related("conversation", "sender", "media").filter(reply=reply, is_active=is_active).order_by("-created_at")
-
-            paginator = Paginator(queryset, page_size)
-            items = paginator.page(page)
-
-            return {
-                "pages": paginator.num_pages,
-                "current": items.number,
-                "content": list(items),
-            }
-        except Exception as e:
-            raise e
-       
+     
     @staticmethod
     def handle_create(data: dict):
         try:
@@ -149,9 +96,36 @@ class MessageRepo:
             items = paginator.page(page)
 
             return {
-                "pages": paginator.num_pages,
-                "current": items.number,
-                "content": list(items),
+                "page": items.number,
+                "page_size": page_size,
+                "total_items": paginator.count,
+                "data": list(items),
+            }
+        except Exception as e:
+            raise e
+        
+    @staticmethod
+    def handle_search_messages(
+        search_data: dict,
+        page: int = 1,
+        page_size: int = 20,
+    ):
+        try:
+            data = FieldsFilter(data=search_data, entity=Message)
+            filters = Q()
+            for field, value in data.items():
+                filters &= Q(**{field: value})
+
+            queryset = Message.objects.filter(filters).order_by("-created_at")
+
+            paginator = Paginator(queryset, page_size)
+            items = paginator.page(page)
+
+            return {
+                "page": items.number,
+                "page_size": page_size,
+                "total_items": paginator.count,
+                "data": list(items),
             }
         except Exception as e:
             raise e

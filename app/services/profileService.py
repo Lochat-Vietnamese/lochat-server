@@ -1,42 +1,27 @@
-from app.dtos.profileDTOs import GetAllProfileDTO, GetProfileByIdDTO
 from app.entities.profile import Profile
-import uuid
 from typing import Dict
 from asgiref.sync import sync_to_async
 
-from app.enums.responseMessages import ResponseMessages
 from app.repositories.profileRepo import ProfileRepo
-from app.utils.exceptionHelper import ExceptionHelper
+from app.helpers.exceptionHelper import ExceptionHelper
 from app.utils.fieldsFilter import FieldsFilter
 
 
 class ProfileService:
     @staticmethod
-    async def get_all(dto: GetAllProfileDTO):
-        try:
-            return await sync_to_async(ProfileRepo.all)(page=dto.page, page_size=dto.page_size, is_active=dto.is_active)
-        except Exception as e:
-            ExceptionHelper.handle_caught_exception(error=e)
-
-    @staticmethod
-    async def get_by_id(dto: GetProfileByIdDTO):
-        try:
-            return await sync_to_async(ProfileRepo.find_by_id)(profile_id=dto.profile_id, is_active=dto.is_active)
-        except Exception as e:
-            ExceptionHelper.handle_caught_exception(error=e)
-
-    @staticmethod
-    async def get_by_nickname(
-        nickname: str, page=1, page_size=20, is_active: bool | None = True
-    ):
+    async def get_all(page: int = 1, page_size: int = 20, is_active: bool | None = True):
         try:
             if page <= 0 or page_size <= 0:
-                ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
-            if not nickname: 
-                ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
-            return await sync_to_async(ProfileRepo.find_by_nickname)(
-                nickname, page, page_size, is_active
-            )
+                ExceptionHelper.throw_bad_request("Invalid page or page size")
+
+            return await sync_to_async(ProfileRepo.all)(page=page, page_size=page_size, is_active=True)
+        except Exception as e:
+            ExceptionHelper.handle_caught_exception(error=e)
+
+    @staticmethod
+    async def get_by_id(profile_id: str, is_active: bool | None = True):
+        try:
+            return await sync_to_async(ProfileRepo.find_by_id)(profile_id=profile_id, is_active= is_active)
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
@@ -47,7 +32,7 @@ class ProfileService:
                 return await sync_to_async(ProfileRepo.find_by_phone_number)(
                     phone_number=phone_number, is_active=is_active
                 )
-            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+            ExceptionHelper.throw_bad_request("Missing phone number")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
@@ -58,7 +43,7 @@ class ProfileService:
             nickname = str(data.get("nickname"))
             dob = data.get("dob")
             if not all([phone_number, nickname, dob]) or await ProfileService.get_by_phone_number(phone_number=phone_number, is_active=None):
-                ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+                ExceptionHelper.throw_bad_request("Missing required fields")
             return await sync_to_async(ProfileRepo.handle_create)(FieldsFilter(data=data, entity=Profile))
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
@@ -71,7 +56,7 @@ class ProfileService:
                 profile = await ProfileService.get_by_id(profile_id, None)
                
                 return await sync_to_async(ProfileRepo.handle_update)(profile, FieldsFilter(data=data, entity=Profile))
-            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+            ExceptionHelper.throw_bad_request("Missing required fields")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
@@ -82,7 +67,7 @@ class ProfileService:
                 profile = await ProfileService.get_by_id(profile_id, None)
  
                 return await sync_to_async(ProfileRepo.handle_delete)(profile)
-            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+            ExceptionHelper.throw_bad_request("Missing required fields")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
@@ -93,6 +78,18 @@ class ProfileService:
                 profile = await ProfileService.get_by_id(profile_id, None)
          
                 return await sync_to_async(ProfileRepo.handle_hard_delete)(profile)
-            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+            ExceptionHelper.throw_bad_request("Missing required fields")
+        except Exception as e:
+            ExceptionHelper.handle_caught_exception(error=e)
+
+    @staticmethod
+    async def search_profiles(search_data: Dict):
+        try:
+            page = search_data.pop("page")
+            page_size = search_data.pop("page_size")
+            if page <= 0 or page_size <= 0:
+                ExceptionHelper.throw_bad_request("Invalid page or page size")
+
+            return await sync_to_async(ProfileRepo.handle_search_profiles)(search_data=search_data, page=page, page_size=page_size)
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)

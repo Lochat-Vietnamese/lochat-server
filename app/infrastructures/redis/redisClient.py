@@ -1,4 +1,4 @@
-import redis
+import redis.asyncio as redis
 from django.conf import settings
 import json
 
@@ -24,28 +24,26 @@ class RedisClient:
 
     async def add(self, key: str, value: str, expire_sec: int = None):
         if expire_sec:
-            self.client.setex(key, expire_sec, value)
+            await self.client.setex(key, expire_sec, value)
         else:
-            self.client.set(key, value)
+            await self.client.set(key, value)
 
     async def get(self, key: str):
-        return self.client.get(key)
+        return await self.client.get(key)
     
     async def delete(self, key: str):
-        return self.client.delete(key)
+        return await self.client.delete(key)
 
     async def exists(self, key: str):
-        return self.client.exists(key)
+        return await self.client.exists(key)
     
     async def get_all(self):
         result = []
-        keys = self.client.keys("*")
+        keys = await self.client.keys("*")
         for key in keys:
-            k = key.decode()
-            value = self.client.get(k)
-            couple = {k: value.decode() if value else None}
-            result.append(couple)
+            value = await self.client.get(key)
+            result.append({key, value})
         return result
     
     async def queue_add(self, queue_key: str, value: dict):
-        self.client.rpush(queue_key, json.dumps(value))
+        await self.client.rpush(queue_key, json.dumps(value))

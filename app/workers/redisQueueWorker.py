@@ -1,43 +1,45 @@
+import asyncio
 import threading
 import json
 import time
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from app.infrastructures.redis.redisClient import RedisClient
 from app.mapping.mediaMapping import MediaMapping
 from app.mapping.messageMapping import MessageMapping
 from app.mapping.profileMapping import ProfileMapping
 from app.utils.logHelper import LogHelper
-from app.utils.redisClient import RedisClient
 from app.services.messageService import MessageService
 from app.enums.messageTypes import MessageTypes
 from app.services.mediaService import MediaService
 
 
-class RedisQueueConsumer(threading.Thread):
+class RedisQueueWorker:
     def __init__(self, queue_key="message_queue"):
-        super().__init__(daemon=True)
         self.queue_key = queue_key
         self.running = True
-        redis_instance = async_to_sync(RedisClient.instance)()
-        self.redis = redis_instance.client
 
-    def run(self):
+    async def run(self):
+        redis = (await RedisClient.instance()).client
+        channel_layer = get_channel_layer()
+
         while self.running:
             try:
-                result = self.redis.blpop(self.queue_key, timeout=5)
-                if result:
-                    _, data_str = result
-                    data = json.loads(data_str)
-                    if data.get("type") == MessageTypes.TEXT:
-                        async_to_sync(self.text_message_handler)(data)
-                    elif data.get("type") == MessageTypes.MEDIA:
-                        async_to_sync(self.media_message_handler)(data)
+                result = await redis.blpop(self.queue_key, timeout=5)
+                if not result:
+                    continue
+
+                _, data_str = result
+                data = json.loads(data_str)
+
+                if data["type"] == MessageTypes.TEXT:
+                    await self.text_message_handler(data, channel_layer)
+                elif data["type"] == MessageTypes.MEDIA:
+                    await self.media_message_handler(data, channel_layer)
+
             except Exception as e:
                 LogHelper.error(message=str(e))
-                time.sleep(1)
-                
-    def stop(self):
-        self.running = False
+                await asyncio.sleep(1)
 
 
     async def text_message_handler(self, data):

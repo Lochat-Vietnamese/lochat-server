@@ -1,13 +1,11 @@
-import uuid
+from uuid import UUID
 from typing import Dict
-from app.dtos.conversationDTOs import GetConversationByIdDTO
 from app.entities.conversation import Conversation
-from app.enums.responseMessages import ResponseMessages
 from app.repositories.conversationRepo import ConversationRepo
 from app.services.profileService import ProfileService
 from asgiref.sync import sync_to_async
 
-from app.utils.exceptionHelper import ExceptionHelper
+from app.helpers.exceptionHelper import ExceptionHelper
 from app.utils.fieldsFilter import FieldsFilter
 
 
@@ -16,7 +14,7 @@ class ConversationService:
     async def get_all(page=1, page_size=20, is_active: bool | None = True):
         try:
             if page <= 0 or page_size <= 0:
-                ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+                ExceptionHelper.throw_bad_request("Invalid page or page size")
             return await sync_to_async(ConversationRepo.all)(
                 page=page, page_size=page_size, is_active=is_active
             )
@@ -24,18 +22,9 @@ class ConversationService:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def get_by_id(dto: GetConversationByIdDTO):
+    async def get_by_id(conversation_id: UUID, is_active: bool | None = True):
         try:
-            return await sync_to_async(ConversationRepo.find_by_id)(conversation_id=dto.conversation_id, is_active=dto.is_active)
-        except Exception as e:
-            ExceptionHelper.handle_caught_exception(error=e)
-        
-    @staticmethod
-    async def get_by_title(title: str, is_active: bool | None = True):
-        try:
-            if str(title).strip():
-                return await sync_to_async(ConversationRepo.find_by_title)(title=title, is_active=is_active)
-            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+            return await sync_to_async(ConversationRepo.find_by_id)(conversation_id=conversation_id, is_active=is_active)
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
@@ -44,7 +33,7 @@ class ConversationService:
         try:
             creator_id = data.get("creator_id")
             if not creator_id or not str(creator_id).strip():
-                ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+                ExceptionHelper.throw_bad_request("Missing required fields")
             creator = await ProfileService.get_by_id(profile_id=creator_id, is_active=True)
 
             data["creator"] = creator
@@ -60,28 +49,28 @@ class ConversationService:
                 conversation = await ConversationService.get_by_id(conversation_id, None)
 
                 return await sync_to_async(ConversationRepo.handle_update)(conversation, FieldsFilter(data=data, entity=Conversation))
-            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+            ExceptionHelper.throw_bad_request("Invalid conversation id")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def delete(conversation_id: str):
+    async def delete(conversation_id: UUID):
         try:
             if conversation_id and str(conversation_id).strip():
                 conversation = await ConversationService.get_by_id(conversation_id, None)
               
                 return await sync_to_async(ConversationRepo.handle_delete)(conversation)
-            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+            ExceptionHelper.throw_bad_request("Invalid conversation id")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def hard_delete(conversation_id: str):
+    async def hard_delete(conversation_id: UUID):
         try:
             if conversation_id and str(conversation_id).strip():
                 conversation = await ConversationService.get_by_id(conversation_id, None)
            
                 return await sync_to_async(ConversationRepo.handle_hard_delete)(conversation)
-            ExceptionHelper.throw_bad_request(ResponseMessages.INVALID_INPUT)
+            ExceptionHelper.throw_bad_request("Invalid conversation id")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)

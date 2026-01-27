@@ -19,9 +19,10 @@ class ConversationRepo:
             items = paginator.page(page)
 
             return {
-                "pages": paginator.num_pages,
-                "current": items.number,
-                "content": list(items),
+                "page": items.number,
+                "page_size": page_size,
+                "total_items": paginator.count,
+                "data": list(items),
             }
         except Exception as e:
             raise e
@@ -32,55 +33,6 @@ class ConversationRepo:
             if is_active is None:
                 return Conversation.objects.select_related("creator").get(id=conversation_id)
             return Conversation.objects.select_related("creator").get(id=conversation_id, is_active=is_active)
-        except Conversation.DoesNotExist:
-            return None
-        except Exception as e:
-            raise e
-    
-    @staticmethod
-    def find_by_title(title: str, page:int, page_size: int, is_active: bool | None):
-        try:
-            if is_active is None:
-                queryset = Conversation.objects.select_related("creator").filter(title=title).order_by("-created_at")
-            else:
-                queryset = Conversation.objects.select_related("creator").filter(title=title, is_active=is_active).order_by("-created_at")
-
-            paginator = Paginator(queryset, page_size)
-            items = paginator.page(page)
-
-            return {
-                "pages": paginator.num_pages,
-                "current": items.number,
-                "content": list(items),
-            }
-        except Exception as e:
-            raise e
-    
-    @staticmethod
-    def find_by_type(type: ConversationTypes, page:int, page_size: int, is_active: bool | None):
-        try:
-            if is_active is None:
-                queryset = Conversation.objects.select_related("creator").filter(type=type).order_by("-created_at")
-            else:
-                queryset = Conversation.objects.select_related("creator").filter(type=type, is_active=is_active).order_by("-created_at")
-
-            paginator = Paginator(queryset, page_size)
-            items = paginator.page(page)
-
-            return {
-                "pages": paginator.num_pages,
-                "current": items.number,
-                "content": list(items),
-            }
-        except Exception as e:
-            raise e
-        
-    @staticmethod
-    def find_by_creator(creator: Profile, is_active: bool | None):
-        try:
-            if is_active is None:
-                return Conversation.objects.select_related("creator").get(creator=creator)
-            return Conversation.objects.select_related("creator").get(creator=creator, is_active=is_active)
         except Conversation.DoesNotExist:
             return None
         except Exception as e:

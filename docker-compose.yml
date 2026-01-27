@@ -49,6 +49,16 @@ services:
     volumes:
       - redis_data:/data
 
+  redis_queue_worker:
+    build: .
+    container_name: redis_queue_worker
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - app
+    command: python manage.py redisWorker
+
 volumes:
   postgres_data:
   redis_data:

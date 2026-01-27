@@ -1,50 +1,15 @@
 from datetime import date
 from typing import Optional
 from uuid import UUID
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, HttpUrl
 from app.enums.provinces import Provinces
-from app.utils.parseBool import ParseBool
 from app.dtos.baseDTO import BaseDTO
-
-
-class GetAllProfileDTO(BaseDTO):
-    page: int = Field(
-        title="Current Page",
-        ge=1,
-        default=1, 
-        examples=1
-    )
-    page_size: int = Field(
-        title="Page Size",
-        ge=5,
-        lt=100,
-        default=10, 
-        examples=10
-    )
-    is_active: bool | None = Field(
-        title="Profiles Activity Status",
-        default=None, 
-        examples=True
-    )
-
-    @field_validator("is_active", mode="before")
-    def parse_is_active(cls, input):
-        return ParseBool(input)
 
 class GetProfileByIdDTO(BaseDTO):
     profile_id: UUID = Field(
         title="Profile ID",
         example="123e4567-e89b-12d3-a456-426655440000",
-    ),
-    is_active: bool | None = Field(
-        title="Profile Activity Status",
-        default=None, 
-        examples=True
     )
-
-    @field_validator("is_active", mode="before")
-    def parse_is_active(cls, input):
-        return ParseBool(input)
     
 class CreateProfileDTO(BaseDTO):
     nickname: str = Field(
@@ -64,14 +29,14 @@ class CreateProfileDTO(BaseDTO):
         examples="profile bio",
         default=None,
     )
-    avatar_url: str | None = Field(
+    avatar_url: HttpUrl | None = Field(
         title="avatar url",
         examples="https://example.com/avatar.jpg",
         default=None,
     )
     address: str | None = Field(
         title="address",
-        examples="example address",
+        examples="123 street a, ward b, city c",
         default=None,
     )
     hometown: Optional[str] | None = Field(
@@ -108,7 +73,7 @@ class CreateProfileDTO(BaseDTO):
             raise ValueError("User must be at least 14 years old")
         return value
     
-    @field_validator("hometown")
+    @field_validator("hometown", mode="before")
     @classmethod
     def validate_hometown(cls, value: str | None):
         if value is None:
@@ -116,3 +81,62 @@ class CreateProfileDTO(BaseDTO):
         if value not in Provinces.values:
             raise ValueError("Invalid hometown")
         return value
+    
+    @field_validator("avatar_url", mode="after")
+    @classmethod
+    def parse_avatar_url(cls, value):
+        if value is None:
+            return value
+        return str(value)
+    
+class SearchProfilesDTO(CreateProfileDTO):
+    is_active: str | None = Field(
+        title="",
+        default=None,
+        example=""
+    )
+    page: int = Field(
+        title="Current Page",
+        ge=1,
+        default=1, 
+        examples=1
+    )
+    page_size: int = Field(
+        title="Page Size",
+        ge=5,
+        lt=100,
+        default=10, 
+        examples=10
+    )
+    @classmethod
+    def is_only_pagination(self):
+        pagination_fields = {"page", "page_size", "is_active"}
+
+        for field_name, value in self.model_dump().items():
+            if field_name not in pagination_fields and value is not None:
+                return False
+        return True
+    
+class GetProfileConversationsDTO(BaseDTO):
+    profile_id: UUID = Field(
+        title="Profile ID",
+        example="123e4567-e89b-12d3-a456-426655440000",
+    )
+    is_active: str | None = Field(
+        title="",
+        default=None,
+        example=""
+    )
+    page: int = Field(
+        title="Current Page",
+        ge=1,
+        default=1, 
+        examples=1
+    )
+    page_size: int = Field(
+        title="Page Size",
+        ge=5,
+        lt=100,
+        default=10, 
+        examples=10
+    )
