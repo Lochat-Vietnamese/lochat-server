@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "corsheaders",
     "app",
+    "workers",
 ]
 
 ASGI_APPLICATION = 'config.asgi.application'
@@ -163,12 +164,13 @@ REDIS_CONFIG = {
     "PORT": os.environ.get("REDIS_PORT"),
     "DB": os.environ.get("REDIS_DB"),
     "PASSWORD": os.environ.get("REDIS_PASSWORD"),
-    "DECODE_RESPONSES": parseBoolean(os.environ.get("REDIS_HOST"))
+    "DECODE_RESPONSES": parseBoolean(os.environ.get("REDIS_DECODE_RESPONSES"))
 }
 
 PUBLIC_ENDPOINTS = [
-    '/login',
-    '/sign-up',
+    '/signin',
+    '/signup',
+    '/logout',
     '/restock-token',
 ]
 
@@ -186,7 +188,7 @@ SIMPLE_JWT = {
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
 corsCsrfAllowedHosts = os.getenv("CORS_CSRF_ALLOWED_HOSTS", "http://localhost").split(",")
-ports = os.getenv("ALLOWED_PORTS").split(",")
+ports = os.getenv("ALLOWED_PORTS", "8080").split(",")
 allowedCorsCsrfOrigins = [f"{host}:{port}" for host in corsCsrfAllowedHosts for port in ports]
 CORS_ALLOWED_ORIGINS = [
     *allowedCorsCsrfOrigins

@@ -106,7 +106,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                         )
                 else:
                     await self.connect_room(represent_conversation, self._current_user)
-        except Exception:
+        except Exception as e:
             await self.accept()
             await self.send(
                 json.dumps(
@@ -114,7 +114,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     ensure_ascii=False,
                 )
             )
-            LogHelper.error(message=str(Exception))
+            LogHelper.error(message=str(e))
 
     async def text(self, event):
         await self.send(
@@ -192,7 +192,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         try:
             if self._room_id:
                 await self.channel_layer.group_discard(self._room_id, self.channel_name)
-        except Exception:
+        except Exception as e:
             try:
                 await self.send(
                     json.dumps(
@@ -200,6 +200,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                         ensure_ascii=False,
                     )
                 )
-            except Exception as e:
-                raise e
-            LogHelper.error(message=str(Exception))
+            except Exception as ex:
+                raise ex
+            LogHelper.error(message=str(e))

@@ -1,4 +1,3 @@
-from app.dtos.profileDTOs import GetAllProfileDTO
 from app.entities.profile import Profile
 from typing import Dict
 from asgiref.sync import sync_to_async

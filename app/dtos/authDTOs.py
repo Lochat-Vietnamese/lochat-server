@@ -18,7 +18,6 @@ class SignInDTO(BaseDTO):
     password: str = Field(
         title="password",
         examples="12345678",
-        min_length=8,
     )
     @model_validator(mode="after")
     def validate_username_or_email(self):
@@ -34,14 +33,14 @@ class SignUpDTO(BaseDTO):
         example="username",
         min_length=5,
         max_length=20,
-        regex="^[a-zA-Z0-9]+$"
+        pattern="^[a-zA-Z0-9]+$"
     )
     password: str = Field(
         title="Password",
         example="password",
         min_length=8,
         max_length=30,
-        regex="^\S+$"
+        pattern=r"^\S+$"
     )
     email: EmailStr = Field(
         title="Email",

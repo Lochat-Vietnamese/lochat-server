@@ -2,7 +2,6 @@ from django.views import View
 
 from app.dtos.accountDTOs import GetAccountByIdDTO
 from app.enums.responseCodes import ResponseCodes
-from app.enums.responseMessages import ResponseMessages
 from app.services.accountService import AccountService
 from app.mapping.accountMapping import AccountMapping
 from app.helpers.baseResponse import BaseResponse

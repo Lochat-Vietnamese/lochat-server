@@ -5,6 +5,7 @@ class BaseDTO(BaseModel):
     model_config = ConfigDict(
         extra="ignore",
         str_strip_whitespace=True,
+        arbitrary_types_allowed=True,
     )
 
     @classmethod

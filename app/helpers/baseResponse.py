@@ -1,8 +1,9 @@
+import json
+from uuid import UUID
 from django.http import JsonResponse
 from typing import Dict, List
 from app.enums.httpStatus import HttpStatus
 from app.enums.responseCodes import ResponseCodes
-
 
 class BaseResponse:
     @staticmethod
@@ -16,16 +17,18 @@ class BaseResponse:
         page_size: int | None = None,
         total_items: int | None = None,
     ):
-        total_pages = (total_items + page_size - 1) // page_size
+        meta = None
+        if page is not None and page_size is not None and total_items is not None:
+            total_pages = (total_items + page_size - 1) // page_size
 
-        meta = {
-            "page": page,
-            "page_size": page_size,
-            "total_pages": total_pages,
-            "total_items": total_items,
-            "has_next": page < total_pages,
-            "has_prev": page > 1,
-        }
+            meta = {
+                "page": page,
+                "page_size": page_size,
+                "total_pages": total_pages,
+                "total_items": total_items,
+                "has_next": page < total_pages,
+                "has_prev": page > 1,
+            }
 
         payload = {
             "code": code,
@@ -37,15 +40,17 @@ class BaseResponse:
         return JsonResponse(
             payload,
             status=status_code,
-            json_dumps_params={"ensure_ascii": False},
+            json_dumps_params={
+                "ensure_ascii": False,
+            },
         )
    
     @staticmethod
     def error(
         *,
-        code: str,
+        status_code: int = HttpStatus.BAD_REQUEST,
+        code: str = ResponseCodes.ERROR,
         message: str,
-        status_code: int,
         details: Dict | None = None,
     ):
         payload = {
