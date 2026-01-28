@@ -161,17 +161,17 @@ class ProfileConversationService:
 
     @staticmethod
     async def get_common_conversations(
-        acc1_id: str,
-        acc2_id: str,
+        profile1_id: str,
+        profile2_id: str,
         is_active: bool | None,
         type: ConversationTypes | None,
     ):
         try:
-            acc1 = await ProfileService.get_by_id(profile_id=acc1_id)
-            acc2 = await ProfileService.get_by_id(profile_id=acc2_id)
+            prof1 = await ProfileService.get_by_id(profile_id=profile1_id)
+            prof2 = await ProfileService.get_by_id(profile_id=profile2_id)
             return await sync_to_async(
                 ProfileConversationRepo.find_common_conversations
-            )(acc1, acc2, is_active=is_active, type=type)
+            )(prof1, prof2, is_active=is_active, type=type)
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
