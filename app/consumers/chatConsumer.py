@@ -4,8 +4,8 @@ from app.enums.conversationTypes import ConversationTypes
 from app.services.profileConversationService import ProfileConversationService
 from app.services.conversationService import ConversationService
 from django.contrib.auth.models import AnonymousUser
-from app.services.accountService import AccountService
 from app.enums.messageTypes import MessageTypes
+from app.services.profileService import ProfileService
 from app.utils.logHelper import LogHelper
 from app.infrastructures.redis.redisClient import RedisClient
 
@@ -36,7 +36,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_add(self._room_id, self.channel_name)
         await self.accept()
         
-        for profile in profiles:
+        for _ in profiles:
             await self.send(
                 json.dumps(
                     {
@@ -50,7 +50,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         try:
             router = self.scope["url_route"]["kwargs"]
-            id = str(router["id"])
+            path_id = str(router["id"])
             self._current_user = self.scope["user"]
             if isinstance(self._current_user, AnonymousUser):
                 await self.accept()
@@ -60,15 +60,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 await self.close()
             else:
                 represent_conversation = await ConversationService.get_by_id(
-                    conversation_id=id
+                    conversation_id=path_id
                 )
                 if not represent_conversation:
-                    friend = await AccountService.get_by_id(account_id=id)
+                    friend = await ProfileService.get_by_id(profile_id=path_id, is_active=True)
                     if friend:
                         common_conversation = (
                             await ProfileConversationService.get_common_conversations(
-                                acc1_id=self._current_user.id,
-                                acc2_id=id,
+                                profile1_id=self._current_user.id,
+                                profile2_id=path_id,
                                 is_active=True,
                                 type=ConversationTypes.PRIVATE,
                             )
@@ -81,12 +81,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
                                 {
                                     "profile_id": str(self._current_user.id),
                                     "conversation_id": str(new_conversation.id),
+                                    "conversation_name": friend.nickname,
                                 }
                             )
                             await ProfileConversationService.create(
                                 {
                                     "profile_id": str(friend.id),
                                     "conversation_id": str(new_conversation.id),
+                                    "conversation_name": self._current_user.nickname,
                                 }
                             )
                             await self.connect_room(
@@ -100,7 +102,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                         await self.accept()
                         await self.send(
                             json.dumps(
-                                {"message": "not_found", "data": None},
+                                {"message": "not_found", "data": "friend not found"},
                                 ensure_ascii=False,
                             )
                         )
@@ -110,7 +112,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.accept()
             await self.send(
                 json.dumps(
-                    {"message": "connection_error", "data": None},
+                    {"message": "connection_error", "data": str(e)},
                     ensure_ascii=False,
                 )
             )

@@ -137,13 +137,13 @@ class ProfileConversationRepo:
             raise e
         
     @staticmethod
-    def find_common_conversations(acc1: Profile, acc2: Profile, is_active: bool | None, type: ConversationTypes | None):
+    def find_common_conversations(prof1: Profile, prof2: Profile, is_active: bool | None, type: ConversationTypes | None):
         try:
-            conv_acc1 = ProfileConversation.objects.filter(profile=acc1).values_list("conversation_id", flat=True)
+            conv_prof1 = ProfileConversation.objects.filter(profile=prof1).values_list("conversation_id", flat=True)
 
             common_conversations = ProfileConversation.objects.filter(
-                profile=acc2,
-                conversation_id__in=conv_acc1
+                profile=prof2,
+                conversation_id__in=conv_prof1
             ).select_related("conversation")
 
             if is_active is None:

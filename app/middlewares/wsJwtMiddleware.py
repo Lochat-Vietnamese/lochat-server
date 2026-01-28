@@ -9,10 +9,11 @@ async def get_user_from_token(token: str):
     try:
         decoded = jwt_decode(
             token,
-            key=settings.SIMPLE_JWT.get("SIGNING_KEY", settings.SECRET_KEY),
+            key=settings.SIMPLE_JWT.get("SIGNING_KEY"),
             algorithms=[settings.SIMPLE_JWT.get("ALGORITHM")],
         )
-        return await AccountService.get_by_id(account_id=decoded["user_id"], is_active=True)
+        token_account = await AccountService.get_by_id(account_id=decoded["user_id"], is_active=True)
+        return token_account.profile
     except Exception:
         return AnonymousUser()
     
@@ -27,4 +28,4 @@ class WsJwtMiddleware(BaseMiddleware):
             scope["user"] = user
         except Exception:
             scope["user"] = AnonymousUser()
-        return super().__call__(scope, receive, send)
+        return await super().__call__(scope, receive, send)
