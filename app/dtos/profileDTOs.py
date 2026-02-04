@@ -1,4 +1,5 @@
 from datetime import date
+from datetime import datetime
 from typing import Optional
 from uuid import UUID
 from pydantic import Field, field_validator, HttpUrl
@@ -60,6 +61,25 @@ class CreateProfileDTO(BaseDTO):
         default=None,
     )
     
+    @field_validator("dob", mode="before")
+    @classmethod
+    def parse_dob(cls, value):
+        if isinstance(value, date):
+            return value
+
+        if isinstance(value, datetime):
+            return value.date()
+
+        if isinstance(value, str):
+            try:
+                return date.fromisoformat(value)
+            except ValueError:
+                return datetime.fromisoformat(
+                    value.replace("Z", "+00:00")
+                ).date()
+
+        raise ValueError("Invalid date format")
+
     @field_validator("dob")
     @classmethod
     def validate_min_age(cls, value: date):
