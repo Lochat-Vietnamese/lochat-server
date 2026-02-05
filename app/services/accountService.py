@@ -1,7 +1,7 @@
 from typing import Dict
 from uuid import UUID
 from app.entities.account import Account
-from app.helpers import UnitOfWorkWrapper
+from app.repositories import UnitOfWorkWrapper
 from app.repositories.accountRepo import AccountRepo
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import check_password, make_password
@@ -167,7 +167,6 @@ class AccountService:
                 )
                 if not profile:
                     profile = await ProfileService.create(data=profile_data)
-
                 account_data = {
                     "username": username,
                     "email": email,
