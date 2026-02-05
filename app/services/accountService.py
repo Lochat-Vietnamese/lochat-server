@@ -1,7 +1,7 @@
 from typing import Dict
 from uuid import UUID
 from app.entities.account import Account
-from app.repositories import UnitOfWorkWrapper
+from app.repositories.unitOfWorkWrapper import UnitOfWorkWrapper
 from app.repositories.accountRepo import AccountRepo
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import check_password, make_password
@@ -10,6 +10,8 @@ from app.helpers.exceptionHelper import ExceptionHelper
 from app.utils.fieldsFilter import FieldsFilter
 from app.infrastructures.redis.redisClient import RedisClient
 from asgiref.sync import async_to_sync
+
+from app.utils.logHelper import LogHelper
 
 class AccountService:
     @staticmethod
@@ -161,10 +163,16 @@ class AccountService:
             if existingUsername or existingEmail:
                 ExceptionHelper.throw_bad_request("Account already exists")
 
+            LogHelper.info(message="trước uow")
+            LogHelper.info(UnitOfWorkWrapper)
+            LogHelper.info(message="sau xem uow")
+            
             with UnitOfWorkWrapper():
+                LogHelper.info(message="vào uow")
                 profile = ProfileService.get_by_phone_number(
                     phone_number=profile_data.get("phone_number"), is_active=None
                 )
+                LogHelper.info(message="sau xem profile")
                 if not profile:
                     profile = ProfileService.create(data=profile_data)
                 account_data = {
