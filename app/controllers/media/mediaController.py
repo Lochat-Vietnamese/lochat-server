@@ -7,6 +7,7 @@ from app.services.mediaService import MediaService
 from app.helpers.baseResponse import BaseResponse
 from app.helpers.exceptionHelper import ExceptionHelper
 from app.utils.requestData import RequestData
+from asgiref.sync import sync_to_async
 
 
 class MediaController(View):
@@ -15,7 +16,7 @@ class MediaController(View):
             if media_id:
                 media_dto = GetMediaByIdDTO(media_id=media_id)
 
-                result = await MediaService.get_by_id(media_id=media_dto.media_id)
+                result = await sync_to_async(MediaService.get_by_id)(media_id=media_dto.media_id)
                 return BaseResponse.success(
                     data=MediaMapping(result).data,
                     code=ResponseCodes.GET_MEDIA_BY_ID_SUCCESS,
@@ -30,7 +31,7 @@ class MediaController(View):
             data = RequestData(request)
             storage_media_dto = StorageMediaFilesDTO(data=data)
 
-            result = await MediaService.storage_media_file(
+            result = await sync_to_async(MediaService.storage_media_file)(
                 files=storage_media_dto.files,
                 uploader_id=storage_media_dto.uploader_id,
             )

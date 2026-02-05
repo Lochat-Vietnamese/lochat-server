@@ -6,6 +6,7 @@ from app.mapping.conversationMapping import ConversationMapping
 from app.services.conversationService import ConversationService
 from app.helpers.baseResponse import BaseResponse
 from app.helpers.exceptionHelper import ExceptionHelper
+from asgiref.sync import sync_to_async
 
 
 class ConversationController(View):
@@ -14,7 +15,7 @@ class ConversationController(View):
             if conversation_id:
                 conversattion_dto = GetConversationByIdDTO(conversation_id=conversation_id)
                 
-                result = await ConversationService.get_by_id(conversattion_dto.conversation_id)
+                result = await sync_to_async(ConversationService.get_by_id)(conversattion_dto.conversation_id)
                 return BaseResponse.success(
                     data=ConversationMapping(result).data,
                     code=ResponseCodes.GET_CONVERSATION_BY_ID_SUCCESS,

@@ -6,6 +6,8 @@ from app.helpers.baseResponse import BaseResponse
 from app.helpers.cookieHelper import CookieHelper
 from app.helpers.exceptionHelper import ExceptionHelper
 from app.services.accountService import AccountService
+from asgiref.sync import sync_to_async
+
 
 
 class Logout(View):
@@ -14,7 +16,7 @@ class Logout(View):
            
             refresh_token = request.COOKIES.get("refresh_token")
             if refresh_token:
-                await AccountService.logout(refresh_token)
+                await sync_to_async(AccountService.logout)(refresh_token)
 
             return CookieHelper.attach(
                 response=BaseResponse.success(

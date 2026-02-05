@@ -3,7 +3,6 @@ import threading
 import json
 import time
 from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
 from app.infrastructures.redis.redisClient import RedisClient
 from app.mapping.mediaMapping import MediaMapping
 from app.mapping.messageMapping import MessageMapping
@@ -12,6 +11,7 @@ from app.utils.logHelper import LogHelper
 from app.services.messageService import MessageService
 from app.enums.messageTypes import MessageTypes
 from app.services.mediaService import MediaService
+from asgiref.sync import sync_to_async
 
 
 class RedisQueueWorker:
@@ -44,7 +44,7 @@ class RedisQueueWorker:
 
     async def text_message_handler(self, data):
         try:
-            result = await MessageService.create(data=data)
+            result = await sync_to_async(MessageService.create)(data=data)
 
             if result:
                 channel_layer = get_channel_layer()

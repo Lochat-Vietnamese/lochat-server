@@ -8,6 +8,7 @@ from app.helpers.exceptionHelper import ExceptionHelper
 from app.mapping.accountMapping import AccountMapping
 from app.services.accountService import AccountService
 from app.utils.requestData import RequestData
+from asgiref.sync import sync_to_async
 
 
 class SignUp(View):
@@ -16,7 +17,7 @@ class SignUp(View):
             raw_data = RequestData(request=request)
             sign_up_dto = SignUpDTO(**raw_data)
 
-            result = await AccountService.sign_up(sign_up_dto.model_dump())
+            result = await sync_to_async(AccountService.sign_up)(sign_up_dto.model_dump())
             return BaseResponse.success(
                 data=AccountMapping(result).data, 
                 code=ResponseCodes.SIGN_UP_SUCCESS, 

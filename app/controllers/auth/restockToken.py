@@ -8,6 +8,7 @@ from app.helpers.cookieHelper import CookieHelper
 from app.helpers.exceptionHelper import ExceptionHelper
 from app.mapping.accountMapping import AccountMapping
 from app.services.accountService import AccountService
+from asgiref.sync import sync_to_async
 
 
 class RestockToken(View):
@@ -16,7 +17,7 @@ class RestockToken(View):
            
             refresh_token = request.COOKIES.get("refresh_token")
             if refresh_token:
-                result = await AccountService.restock_token(refresh_token)
+                result = await sync_to_async(AccountService.restock_token)(refresh_token)
                 account = AccountMapping(result.get("account")).data
                 return CookieHelper.attach(
                     response=BaseResponse.success(
