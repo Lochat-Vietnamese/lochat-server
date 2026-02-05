@@ -7,6 +7,7 @@ from app.services.messageService import MessageService
 from app.helpers.baseResponse import BaseResponse
 from app.helpers.exceptionHelper import ExceptionHelper
 from app.utils.requestData import RequestData
+from asgiref.sync import sync_to_async
 
 
 class MessageController(View):
@@ -14,7 +15,7 @@ class MessageController(View):
         try:
             if message_id:
                 message_dto = GetMessageByIdDTO(message_id=message_id)
-                result = await MessageService.get_by_id(message_id=message_dto.message_id)
+                result = await sync_to_async(MessageService.get_by_id)(message_id=message_dto.message_id)
                 return BaseResponse.success(
                     data=MessageMapping(result).data,
                     code=ResponseCodes.GET_MESSAGE_BY_ID_SUCCESS,
@@ -25,7 +26,7 @@ class MessageController(View):
             search_messages_dto = SearchMessagesDTO(**raw_data)
 
             if search_messages_dto.is_only_pagination():
-                result = await MessageService.get_all(page=search_messages_dto.page, page_size=search_messages_dto.page_size, is_active=search_messages_dto.is_active)
+                result = await sync_to_async(MessageService.get_all)(page=search_messages_dto.page, page_size=search_messages_dto.page_size, is_active=search_messages_dto.is_active)
                 return BaseResponse.success(
                     data=MessageMapping(result.get("data", []), many=True).data,
                     code=ResponseCodes.SEARCH_PROFILE_SUCCESS,
@@ -36,14 +37,14 @@ class MessageController(View):
                 )
 
             if search_messages_dto.get_last == True:
-                result = await MessageService.get_last_conversation_message(conversation_id=search_messages_dto.conversation_id)
+                result = await sync_to_async(MessageService.get_last_conversation_message)(conversation_id=search_messages_dto.conversation_id)
                 return BaseResponse.success(
                     data=MessageMapping(result).data,
                     code=ResponseCodes.GET_LAST_CONVERSATION_MESSAGE_SUCCESS,
                     message="Get last conversation message successfully",
                 )
             
-            result = await MessageService.search_messages(search_messages_dto.model_dump())
+            result = await sync_to_async(MessageService.search_messages)(search_messages_dto.model_dump())
             return BaseResponse.success(
                 data=MessageMapping(result.get("data", []), many=True).data,
                 code=ResponseCodes.SEARCH_PROFILE_SUCCESS,

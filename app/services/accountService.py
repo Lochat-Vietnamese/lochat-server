@@ -9,7 +9,7 @@ from app.services.profileService import ProfileService
 from app.helpers.exceptionHelper import ExceptionHelper
 from app.utils.fieldsFilter import FieldsFilter
 from app.infrastructures.redis.redisClient import RedisClient
-from asgiref.sync import sync_to_async
+from asgiref.sync import async_to_sync
 
 class AccountService:
     @staticmethod
@@ -19,30 +19,30 @@ class AccountService:
         return email.count("@") == 1
 
     @staticmethod
-    async def get_all(page=1, page_size=20, is_active: bool | None = True):
+    def get_all(page=1, page_size=20, is_active: bool | None = True):
         try:
             if page <= 0 or page_size <= 0:
                 ExceptionHelper.throw_bad_request("Invalid page or page size")
-            return await sync_to_async(AccountRepo.all)(
+            return AccountRepo.all(
                 page=page, page_size=page_size, is_active=is_active
             )
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def get_by_id(account_id: UUID, is_active: bool | None = True):
+    def get_by_id(account_id: UUID, is_active: bool | None = True):
         try:
             if account_id and str(account_id).strip():
-                return await sync_to_async(AccountRepo.find_by_id)(account_id=account_id, is_active=is_active)
+                return AccountRepo.find_by_id(account_id=account_id, is_active=is_active)
             ExceptionHelper.throw_bad_request("Missing account id")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def get_by_username(username: str, is_active: bool | None = True):
+    def get_by_username(username: str, is_active: bool | None = True):
         try:
             if username and str(username).strip():
-                return await sync_to_async(AccountRepo.find_by_username)(
+                return AccountRepo.find_by_username(
                     username=username, is_active=is_active
                 )
             ExceptionHelper.throw_bad_request("Missing username")
@@ -50,69 +50,69 @@ class AccountService:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def get_by_email(email: str, is_active: bool | None = True):
+    def get_by_email(email: str, is_active: bool | None = True):
         try:
             if AccountService.is_valid_email(email):
-                return await sync_to_async(AccountRepo.find_by_email)(email=email, is_active=is_active)
+                return AccountRepo.find_by_email(email=email, is_active=is_active)
             ExceptionHelper.throw_bad_request("Invalid email")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def create(data: Dict):
+    def create(data: Dict):
         try:
             username = data.get("username")
             email = data.get("email")
 
-            if await sync_to_async(AccountRepo.find_by_username)(username, None):
+            if AccountRepo.find_by_username(username, None):
                 ExceptionHelper.throw_bad_request("account already exists")
 
-            if await sync_to_async(AccountRepo.find_by_email)(email, None):
+            if AccountRepo.find_by_email(email, None):
                 ExceptionHelper.throw_bad_request("account already exists")
 
-            return await sync_to_async(AccountRepo.handle_create)(FieldsFilter(data=data, entity=Account))
+            return AccountRepo.handle_create(FieldsFilter(data=data, entity=Account))
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def update(data: Dict):
+    def update(data: Dict):
         try:
             account_id = data.get("id")
             if account_id and str(account_id).strip() and any(data.values()):
-                account = await AccountService.get_by_id(account_id, None)
+                account = AccountService.get_by_id(account_id, None)
                 if not account:
                     ExceptionHelper.throw_not_found("Account not found")
-                return await sync_to_async(AccountRepo.handle_update)(account, FieldsFilter(data=data, entity=Account))
+                return AccountRepo.handle_update(account, FieldsFilter(data=data, entity=Account))
             ExceptionHelper.throw_bad_request("Missing account id")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def delete(account_id: UUID):
+    def delete(account_id: UUID):
         try:
             if account_id and str(account_id).strip():
-                account = await AccountService.get_by_id(account_id, None)
+                account = AccountService.get_by_id(account_id, None)
                 if not account:
                     ExceptionHelper.throw_not_found("Account not found")
-                return await sync_to_async(AccountRepo.handle_delete)(account)
+                return AccountRepo.handle_delete(account)
             ExceptionHelper.throw_bad_request("Missing account id")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def hard_delete(account_id: UUID):
+    def hard_delete(account_id: UUID):
         try:
             if account_id and str(account_id).strip():
-                account = await AccountService.get_by_id(account_id, None)
+                account = AccountService.get_by_id(account_id, None)
                 if not account:
                     ExceptionHelper.throw_not_found("Account not found")
-                return await sync_to_async(AccountRepo.handle_hard_delete)(account)
+                return AccountRepo.handle_hard_delete(account)
             ExceptionHelper.throw_bad_request("Missing account id")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
     
     @staticmethod
-    async def login(data: Dict):
+    def login(data: Dict):
         try:
             username = data.get('username')
             email = data.get('email')
@@ -120,9 +120,9 @@ class AccountService:
 
             account = None
             if username:
-                account = await AccountService.get_by_username(username=username)
+                account = AccountService.get_by_username(username=username)
             elif email:
-                account = await AccountService.get_by_email(email=email)
+                account = AccountService.get_by_email(email=email)
 
             if account and not account.is_active:
                 ExceptionHelper.throw_bad_request("Account is not active")
@@ -130,8 +130,8 @@ class AccountService:
             if account and check_password(password, account.password):
                 refresh = RefreshToken.for_user(account)
                 refresh["profile_id"] = str(account.profile.id)
-                rd = await RedisClient.instance()
-                await rd.add(
+                rd = async_to_sync(RedisClient.instance)()
+                async_to_sync(rd.add)(
                     key=f"token_{account.id}",
                     value=str(refresh),
                     expire_sec=7 * 24 * 60 * 60,
@@ -146,7 +146,7 @@ class AccountService:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def sign_up(data: Dict):
+    def sign_up(data: Dict):
         try:
             username = data.get("username")
             email = data.get("email")
@@ -156,43 +156,43 @@ class AccountService:
             if not all([username, email, password, profile_data]):
                 ExceptionHelper.throw_bad_request("Missing required fields")
             
-            existingUsername = await AccountService.get_by_username(username, None)
-            existingEmail = await AccountService.get_by_email(email, None)
+            existingUsername = AccountService.get_by_username(username, None)
+            existingEmail = AccountService.get_by_email(email, None)
             if existingUsername or existingEmail:
                 ExceptionHelper.throw_bad_request("Account already exists")
 
-            async with UnitOfWorkWrapper():
-                profile = await ProfileService.get_by_phone_number(
+            with UnitOfWorkWrapper():
+                profile = ProfileService.get_by_phone_number(
                     phone_number=profile_data.get("phone_number"), is_active=None
                 )
                 if not profile:
-                    profile = await ProfileService.create(data=profile_data)
+                    profile = ProfileService.create(data=profile_data)
                 account_data = {
                     "username": username,
                     "email": email,
                     "password": make_password(password),
                     "profile": profile,
                 }
-                return await AccountService.create(data=account_data)
+                return AccountService.create(data=account_data)
 
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def restock_token(refresh_token: str):
+    def restock_token(refresh_token: str):
         try:
             token = RefreshToken(refresh_token)
             account_id = token["user_id"]
 
-            account = await AccountService.get_by_id(account_id)
+            account = AccountService.get_by_id(account_id)
             if not account:
                 ExceptionHelper.throw_unauthorized("Invalid token")
             
-            rd = await RedisClient.instance()
-            if await rd.exists(f"token_{account_id}") != 0:
+            rd = async_to_sync(RedisClient.instance)()
+            if async_to_sync(rd.exists)(f"token_{account_id}") != 0:
                 refresh = RefreshToken.for_user(account)
                 access = refresh.access_token
-                await rd.add(
+                async_to_sync(rd.add)(
                     key=f"token_{account.id}",
                     value=str(refresh),
                     expire_sec=7 * 24 * 60 * 60,
@@ -208,17 +208,17 @@ class AccountService:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def logout(refresh_token: str):
+    def logout(refresh_token: str):
         try:
             token = RefreshToken(refresh_token)
             account_id = token["user_id"]
 
-            account = await AccountService.get_by_id(account_id)
+            account = AccountService.get_by_id(account_id)
             if not account:
                 ExceptionHelper.throw_unauthorized("Invalid token")
 
-            rd = await RedisClient.instance()
-            await rd.delete(f"token_{account_id}")
+            rd = async_to_sync(RedisClient.instance)()
+            async_to_sync(rd.delete)(f"token_{account_id}")
             return
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)

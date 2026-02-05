@@ -8,6 +8,7 @@ from app.services.relationService import RelationService
 from app.helpers.baseResponse import BaseResponse
 from app.helpers.exceptionHelper import ExceptionHelper
 from app.utils.requestData import RequestData
+from asgiref.sync import sync_to_async
 
 
 class RelationController(View):
@@ -16,7 +17,7 @@ class RelationController(View):
             if relation_id:
                 dto = GetRelationByIdDTO(relation_id=relation_id)
 
-                result = await RelationService.get_by_id(relation_id=dto.relation_id, is_active=True)
+                result = await sync_to_async(RelationService.get_by_id)(relation_id=dto.relation_id, is_active=True)
                 return BaseResponse.success(
                     data=RelationMapping(result).data,
                     code=ResponseCodes.GET_RELATION_BY_ID_SUCCESS,
@@ -27,7 +28,7 @@ class RelationController(View):
             search_relations_dto = SearchRelationsDTO(**raw_data)
 
             if search_relations_dto.is_only_pagination():
-                result = await RelationService.get_all(page=search_relations_dto.page, page_size=search_relations_dto.page_size, is_active=search_relations_dto.is_active)
+                result = await sync_to_async(RelationService.get_all)(page=search_relations_dto.page, page_size=search_relations_dto.page_size, is_active=search_relations_dto.is_active)
                 return BaseResponse.success(
                     data=RelationMapping(result.get("data", []), many=True).data,
                     code=ResponseCodes.GET_ALL_RELATIONS_SUCCESS,
@@ -38,7 +39,7 @@ class RelationController(View):
                 )
 
 
-            result = await RelationService.search_relations(search_relations_dto.model_dump())
+            result = await sync_to_async(RelationService.search_relations)(search_relations_dto.model_dump())
             return BaseResponse.success(
                 data=RelationMapping(result.get("data", []), many=True).data,
                 code=ResponseCodes.SEARCH_RELATION_SUCCESS,
@@ -56,7 +57,7 @@ class RelationController(View):
             raw_data = RequestData(request=request)
             create_relation_dto = CreateRelationDTO(**raw_data)
 
-            result = await RelationService.create(create_relation_dto.model_dump())
+            result = await sync_to_async(RelationService.create)(create_relation_dto.model_dump())
             return BaseResponse.success(
                 status_code=HttpStatus.CREATED,
                 data=RelationMapping(result).data,
@@ -72,7 +73,7 @@ class RelationController(View):
             raw_data = RequestData(request=request)
             update_relation_dto = UpdateRelationDTO(**raw_data)
 
-            result = await RelationService.update(update_relation_dto.model_dump())
+            result = await sync_to_async(RelationService.update)(update_relation_dto.model_dump())
             return BaseResponse.success(
                 data=RelationMapping(result).data,
                 code=ResponseCodes.UPDATE_RELATION_SUCCESS,

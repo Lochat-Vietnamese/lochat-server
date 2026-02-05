@@ -8,6 +8,7 @@ from app.enums.messageTypes import MessageTypes
 from app.services.profileService import ProfileService
 from app.utils.logHelper import LogHelper
 from app.infrastructures.redis.redisClient import RedisClient
+from asgiref.sync import sync_to_async
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -27,7 +28,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def connect_room(self, conversation, *profiles):
         self._redis_instance = await RedisClient.instance()
         self._room_id = str(conversation.id)
-        self._current_sender_relation = await ProfileConversationService.get_by_both(
+        self._current_sender_relation = await sync_to_async(ProfileConversationService.get_by_both)(
             conversation_id=self._room_id,
             profile_id=self._current_user.id,
             is_active=True,
@@ -59,14 +60,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 )
                 await self.close()
             else:
-                represent_conversation = await ConversationService.get_by_id(
+                represent_conversation = await sync_to_async(ConversationService.get_by_id)(
                     conversation_id=path_id
                 )
                 if not represent_conversation:
-                    friend = await ProfileService.get_by_id(profile_id=path_id, is_active=True)
+                    friend = await sync_to_async(ProfileService.get_by_id)(profile_id=path_id, is_active=True)
                     if friend:
                         common_conversation = (
-                            await ProfileConversationService.get_common_conversations(
+                            await sync_to_async(ProfileConversationService.get_common_conversations)(
                                 profile1_id=self._current_user.id,
                                 profile2_id=path_id,
                                 is_active=True,
@@ -74,17 +75,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
                             )
                         )
                         if not common_conversation:
-                            new_conversation = await ConversationService.create(
+                            new_conversation = await sync_to_async(ConversationService.create)(
                                 {"creator_id": str(self._current_user.id)}
                             )
-                            await ProfileConversationService.create(
+                            await sync_to_async(ProfileConversationService.create)(
                                 {
                                     "profile_id": str(self._current_user.id),
                                     "conversation_id": str(new_conversation.id),
                                     "conversation_name": friend.nickname,
                                 }
                             )
-                            await ProfileConversationService.create(
+                            await sync_to_async(ProfileConversationService.create)(
                                 {
                                     "profile_id": str(friend.id),
                                     "conversation_id": str(new_conversation.id),

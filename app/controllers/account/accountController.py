@@ -6,6 +6,8 @@ from app.services.accountService import AccountService
 from app.mapping.accountMapping import AccountMapping
 from app.helpers.baseResponse import BaseResponse
 from app.helpers.exceptionHelper import ExceptionHelper
+from asgiref.sync import sync_to_async
+
 
 
 class AccountController(View):
@@ -14,7 +16,7 @@ class AccountController(View):
             if account_id:
                 account_dto = GetAccountByIdDTO(account_id=account_id)
 
-                result = await AccountService.get_by_id(account_id=account_dto.account_id)
+                result = await sync_to_async(AccountService.get_by_id)(account_id=account_dto.account_id)
                 return BaseResponse.success(
                     data=AccountMapping(result).data,
                     code=ResponseCodes.GET_ACCOUNT_BY_ID_SUCCESS,

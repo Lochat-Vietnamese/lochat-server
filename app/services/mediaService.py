@@ -7,7 +7,6 @@ from app.repositories.mediaRepo import MediaRepo
 from app.enums.mediaTypes import MediaTypes
 import aioboto3
 from django.conf import settings
-from asgiref.sync import sync_to_async
 
 from app.services.profileConversationService import ProfileConversationService
 from app.helpers.exceptionHelper import ExceptionHelper
@@ -16,35 +15,35 @@ from app.utils.fieldsFilter import FieldsFilter
 
 class MediaService:
     @staticmethod
-    async def get_all(page=1, page_size=20, is_active: bool | None = True):
+    def get_all(page=1, page_size=20, is_active: bool | None = True):
         try:
             if page <= 0 or page_size <= 0:
                 ExceptionHelper.throw_bad_request("Invalid page or page size")
 
-            return await sync_to_async(MediaRepo.all)(
+            return MediaRepo.all(
                 page=page, page_size=page_size, is_active=is_active
             )
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def get_by_id(media_id: UUID, is_active: bool | None = True):
+    def get_by_id(media_id: UUID, is_active: bool | None = True):
         try:
-            return await sync_to_async(MediaRepo.find_by_id)(media_id=UUID(media_id), is_active=is_active)
+            return MediaRepo.find_by_id(media_id=UUID(media_id), is_active=is_active)
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def get_by_url(url: str, is_active: bool | None = True):
+    def get_by_url(url: str, is_active: bool | None = True):
         try:
             if url and str(url).strip():
-                return await sync_to_async(MediaRepo.find_by_url)(url=url, is_active=is_active)
+                return MediaRepo.find_by_url(url=url, is_active=is_active)
             ExceptionHelper.throw_bad_request("Invalid url")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def create(data: Dict):
+    def create(data: Dict):
         try:
             name = data.get("name")
             type = data.get("type")
@@ -54,7 +53,7 @@ class MediaService:
             if not all([name, type, size, url]):
                 ExceptionHelper.throw_bad_request("Missing required fields")
 
-            existing = await MediaService.get_by_url(url=url, is_active=None)
+            existing = MediaService.get_by_url(url=url, is_active=None)
             if existing:
                 ExceptionHelper.throw_bad_request("Media already exists")
 
@@ -63,48 +62,48 @@ class MediaService:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def update(data: Dict):
+    def update(data: Dict):
         try:
             media_id = data.get("id")
             if media_id and str(media_id).strip():
-                media = await MediaService.get_by_id(media_id=media_id, is_active=None)
+                media = MediaService.get_by_id(media_id=media_id, is_active=None)
                 
-                return await sync_to_async(MediaRepo.handle_update)(media, FieldsFilter(data=data, entity=Media))
+                return MediaRepo.handle_update(media, FieldsFilter(data=data, entity=Media))
             ExceptionHelper.throw_bad_request("Invalid media id")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def delete(media_id: UUID):
+    def delete(media_id: UUID):
         try:
             if media_id and str(media_id).strip():
-                media = await MediaService.get_by_id(media_id, is_active=None)
+                media = MediaService.get_by_id(media_id, is_active=None)
                
-                return await sync_to_async(MediaRepo.handle_delete)(media)
+                return MediaRepo.handle_delete(media)
             ExceptionHelper.throw_bad_request("Invalid media id")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
 
     @staticmethod
-    async def hard_delete(media_id: UUID):
+    def hard_delete(media_id: UUID):
         try:
             if media_id and str(media_id).strip():
-                media = await MediaService.get_by_id(media_id, is_active=None)
+                media = MediaService.get_by_id(media_id, is_active=None)
                
-                return await sync_to_async(MediaRepo.handle_hard_delete)(media)
+                return MediaRepo.handle_hard_delete(media)
             ExceptionHelper.throw_bad_request("Invalid media id")
         except Exception as e:
             ExceptionHelper.handle_caught_exception(error=e)
          
     @staticmethod
-    async def storage_media_file(files: List[UploadedFile], uploader_id: UUID):
+    def storage_media_file(files: List[UploadedFile], uploader_id: UUID):
         try:
-            uploader = await ProfileConversationService.get_by_id(profileConversation_id=uploader_id, is_active=None)
+            uploader = ProfileConversationService.get_by_id(profileConversation_id=uploader_id, is_active=None)
 
             session = aioboto3.Session()
             result = []
 
-            async with session.client(
+            with session.client(
                 "s3",
                 aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
                 aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
@@ -147,7 +146,7 @@ class MediaService:
 
                     storage_url = f"{folder}/{uploader.conversation.id}/{storage_key}"
                     
-                    await storage_client.upload_fileobj(
+                    storage_client.upload_fileobj(
                         file,
                         settings.AWS_STORAGE_BUCKET_NAME,
                         storage_url,
@@ -156,7 +155,7 @@ class MediaService:
                             'ContentType': content_type
                         }
                     )
-                    media = await MediaService.create({
+                    media = MediaService.create({
                         "uploader": uploader,
                         "name": file_name,
                         "type": file_type,

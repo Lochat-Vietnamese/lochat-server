@@ -10,6 +10,7 @@ from app.services.accountService import AccountService
 from app.helpers.baseResponse import BaseResponse
 from app.helpers.exceptionHelper import ExceptionHelper
 from app.utils.requestData import RequestData
+from asgiref.sync import sync_to_async
 
 
 class SignIn(View):
@@ -18,7 +19,7 @@ class SignIn(View):
             raw_data = RequestData(request=request)
             sign_in_dto = SignInDTO(**raw_data)
 
-            result = await AccountService.login(sign_in_dto.model_dump())
+            result = await sync_to_async(AccountService.login)(sign_in_dto.model_dump())
             account = AccountMapping(result.get("account")).data
 
             return CookieHelper.attach(

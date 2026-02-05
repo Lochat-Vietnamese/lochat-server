@@ -7,6 +7,7 @@ from app.helpers.exceptionHelper import ExceptionHelper
 from app.mapping.profileConversationMapping import ProfileConversationMapping
 from app.services.profileConversationService import ProfileConversationService
 from app.utils.requestData import RequestData
+from asgiref.sync import sync_to_async
 
 
 class MembershipController(View):
@@ -15,7 +16,7 @@ class MembershipController(View):
             if membership_id:
                 membership_dto = GetMembershipByIdDTO(membership_id=membership_id)
 
-                result = await ProfileConversationService.get_by_id(membership_id=membership_dto.membership_id, is_active=True)
+                result = await sync_to_async(ProfileConversationService.get_by_id)(membership_id=membership_dto.membership_id, is_active=True)
                 return BaseResponse.success(
                     data=ProfileConversationMapping(result).data,
                     code=ResponseCodes.GET_MEMBERSHIP_BY_ID_SUCCESS,
@@ -25,7 +26,7 @@ class MembershipController(View):
             raw_data = RequestData(request=request)
             search_memberships_dto = SearchMembershipDTO(**raw_data)
 
-            result = await ProfileConversationService.search_memberships(search_data=search_memberships_dto.model_dump())
+            result = await sync_to_async(ProfileConversationService.search_memberships)(search_data=search_memberships_dto.model_dump())
 
             return BaseResponse.success(
                 data=ProfileConversationMapping(result).data,

@@ -7,6 +7,7 @@ from app.helpers.exceptionHelper import ExceptionHelper
 from app.mapping.conversationMapping import ConversationMapping
 from app.services.profileConversationService import ProfileConversationService
 from app.utils.requestData import RequestData
+from asgiref.sync import sync_to_async
 
 
 class ProfileConversationsController(View):
@@ -28,7 +29,7 @@ class ProfileConversationsController(View):
                     status_code=HttpStatus.FORBIDDEN,
                     details="You don't have permission to get this profile's conversations"
                 )
-            result = await ProfileConversationService.get_by_profile(
+            result = await sync_to_async(ProfileConversationService.get_by_profile)(
                 profile_id=get_conversations_dto.profile_id,
                 page=get_conversations_dto.page,
                 page_size=get_conversations_dto.page_size,
