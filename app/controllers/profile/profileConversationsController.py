@@ -6,6 +6,7 @@ from app.helpers.baseResponse import BaseResponse
 from app.helpers.exceptionHelper import ExceptionHelper
 from app.mapping.conversationMapping import ConversationMapping
 from app.services.profileConversationService import ProfileConversationService
+from app.utils.parseBool import ParseBool
 from app.utils.requestData import RequestData
 from asgiref.sync import sync_to_async
 
@@ -22,7 +23,7 @@ class ProfileConversationsController(View):
             raw_data["profile_id"] = profile_id
             get_conversations_dto = GetProfileConversationsDTO(**raw_data)
 
-            if get_conversations_dto.profile_id != logging_in_profile_id:
+            if str(get_conversations_dto.profile_id) != str(logging_in_profile_id):
                 return BaseResponse.error(
                     code=ResponseCodes.PERMISSION_DENIED,
                     message="permission denied",
@@ -33,7 +34,7 @@ class ProfileConversationsController(View):
                 profile_id=get_conversations_dto.profile_id,
                 page=get_conversations_dto.page,
                 page_size=get_conversations_dto.page_size,
-                is_active=get_conversations_dto.is_active,
+                is_active=ParseBool(get_conversations_dto.is_active),
             )
             profile_conversations = result["data"]
             conversations = [pc.conversation for pc in profile_conversations]

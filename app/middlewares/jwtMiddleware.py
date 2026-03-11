@@ -4,8 +4,6 @@ from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from app.enums.httpStatus import HttpStatus
 from app.enums.responseCodes import ResponseCodes
 from app.helpers.baseResponse import BaseResponse
-from app.helpers.exceptionHelper import ExceptionHelper
-
 
 class JwtMiddleware:
     def __init__(self, get_response):

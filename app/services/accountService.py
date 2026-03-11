@@ -132,6 +132,9 @@ class AccountService:
             if account and check_password(password, account.password):
                 refresh = RefreshToken.for_user(account)
                 refresh["profile_id"] = str(account.profile.id)
+                access = refresh.access_token
+                access["profile_id"] = str(account.profile.id)
+
                 rd = async_to_sync(RedisClient.instance)()
                 async_to_sync(rd.add)(
                     key=f"token_{account.id}",
@@ -139,7 +142,7 @@ class AccountService:
                     expire_sec=7 * 24 * 60 * 60,
                 )
                 return {
-                    "access_token": str(refresh.access_token),
+                    "access_token": str(access),
                     "refresh_token": str(refresh),
                     "account": account,
                 }
@@ -163,16 +166,12 @@ class AccountService:
             if existingUsername or existingEmail:
                 ExceptionHelper.throw_bad_request("Account already exists")
 
-            LogHelper.info(message="trước uow")
             LogHelper.info(UnitOfWorkWrapper)
-            LogHelper.info(message="sau xem uow")
             
             with UnitOfWorkWrapper():
-                LogHelper.info(message="vào uow")
                 profile = ProfileService.get_by_phone_number(
                     phone_number=profile_data.get("phone_number"), is_active=None
                 )
-                LogHelper.info(message="sau xem profile")
                 if not profile:
                     profile = ProfileService.create(data=profile_data)
                 account_data = {
@@ -199,7 +198,10 @@ class AccountService:
             rd = async_to_sync(RedisClient.instance)()
             if async_to_sync(rd.exists)(f"token_{account_id}") != 0:
                 refresh = RefreshToken.for_user(account)
+                refresh["profile_id"] = str(account.profile.id)
                 access = refresh.access_token
+                access["profile_id"] = str(account.profile.id)
+                
                 async_to_sync(rd.add)(
                     key=f"token_{account.id}",
                     value=str(refresh),
