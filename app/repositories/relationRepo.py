@@ -101,6 +101,8 @@ class RelationRepo:
 
             filters = Q()
             for field, value in filtered_data.items():
+                if value is None:
+                    continue
                 filters &= Q(**{field: value})
 
             if first_user_id and second_user_id:

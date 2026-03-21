@@ -95,6 +95,8 @@ class ProfileRepo:
             data = FieldsFilter(data=search_data, entity=Profile)
             filters = Q()
             for field, value in data.items():
+                if value is None:
+                    continue
                 if field == "nickname":
                     filters &= Q(nickname__icontains=value)
                 else:

@@ -114,6 +114,8 @@ class MessageRepo:
             data = FieldsFilter(data=search_data, entity=Message)
             filters = Q()
             for field, value in data.items():
+                if value is None:
+                    continue
                 filters &= Q(**{field: value})
 
             queryset = Message.objects.filter(filters).order_by("-created_at")
