@@ -36,10 +36,15 @@ urlpatterns = [
 
     path('accounts/<uuid:account_id>', AccountController.as_view(), name='accounts'),
     path('conversations/<uuid:conversation_id>', ConversationController.as_view(), name='conversations'),
+    path('conversations', ConversationController.as_view(), name='conversations-list'),
     path('medias/<uuid:media_id>', MediaController.as_view(), name='medias'),
+    path('medias', MediaController.as_view(), name='medias-list'),
     path('memberships/<uuid:membership_id>', MembershipController.as_view(), name='memberships'),
+    path('memberships', MembershipController.as_view(), name='memberships-list'),
     path('messages/<uuid:message_id>', MessageController.as_view(), name='messages'),
+    path('messages', MessageController.as_view(), name='messages-list'),
     path('profiles/<uuid:profile_id>', ProfileController.as_view(), name='profiles'),
+    path('profiles', ProfileController.as_view(), name='profiles-list'),
     path('profiles/<uuid:profile_id>/conversations', ProfileConversationsController.as_view(), name='profiles-conversations'),
     path('relations/<uuid:relation_id>', RelationController.as_view(), name='relations'),
 ]

@@ -13,7 +13,9 @@ class ProfileRepo:
             if is_active is None:
                 queryset = Profile.objects.all().order_by("-created_at")
             else:
-                queryset = Profile.objects.filter(is_active=is_active).order_by("-created_at")
+                queryset = Profile.objects.filter(is_active=is_active).order_by(
+                    "-created_at"
+                )
 
             paginator = Paginator(queryset, page_size)
             items = paginator.page(page)
@@ -82,7 +84,7 @@ class ProfileRepo:
             return True
         except Exception as e:
             raise e
-        
+
     @staticmethod
     def handle_search_profiles(
         search_data: dict,
@@ -93,7 +95,10 @@ class ProfileRepo:
             data = FieldsFilter(data=search_data, entity=Profile)
             filters = Q()
             for field, value in data.items():
-                filters &= Q(**{field: value})
+                if field == "nickname":
+                    filters &= Q(nickname__icontains=value)
+                else:
+                    filters &= Q(**{field: value})
 
             queryset = Profile.objects.filter(filters).order_by("-created_at")
 

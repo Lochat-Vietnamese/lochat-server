@@ -72,7 +72,6 @@ class SearchMessagesDTO(BaseDTO):
         return ParseBool(input)
     
     @field_validator("type")
-    @classmethod
     def validate_message_type(cls, value: str | None):
         if value is None:
             return value
@@ -80,7 +79,6 @@ class SearchMessagesDTO(BaseDTO):
             raise ValueError("Invalid message type")
         return value
     
-    @classmethod
     def is_only_pagination(self):
         pagination_fields = {"page", "page_size", "is_active"}
 

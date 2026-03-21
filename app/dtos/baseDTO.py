@@ -8,7 +8,6 @@ class BaseDTO(BaseModel):
         arbitrary_types_allowed=True,
     )
 
-    @classmethod
     def validate_or_throw(cls, data):
         try:
             return cls.model_validate(data)

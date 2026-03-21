@@ -5,6 +5,7 @@ from uuid import UUID
 from pydantic import Field, field_validator, HttpUrl
 from app.enums.provinces import Provinces
 from app.dtos.baseDTO import BaseDTO
+from app.utils.parseBool import ParseBool
 
 class GetProfileByIdDTO(BaseDTO):
     profile_id: UUID = Field(
@@ -62,7 +63,6 @@ class CreateProfileDTO(BaseDTO):
     )
     
     @field_validator("dob", mode="before")
-    @classmethod
     def parse_dob(cls, value):
         if isinstance(value, date):
             return value
@@ -81,7 +81,6 @@ class CreateProfileDTO(BaseDTO):
         raise ValueError("Invalid date format")
 
     @field_validator("dob")
-    @classmethod
     def validate_min_age(cls, value: date):
         today = date.today()
         if value > today:
@@ -94,7 +93,6 @@ class CreateProfileDTO(BaseDTO):
         return value
     
     @field_validator("hometown", mode="before")
-    @classmethod
     def validate_hometown(cls, value: str | None):
         if value is None:
             return value
@@ -103,14 +101,23 @@ class CreateProfileDTO(BaseDTO):
         return value
     
     @field_validator("avatar_url", mode="after")
-    @classmethod
     def parse_avatar_url(cls, value):
         if value is None:
             return value
         return str(value)
     
-class SearchProfilesDTO(CreateProfileDTO):
-    is_active: str | None = Field(
+class SearchProfilesDTO(BaseDTO):
+    nickname: str | None = Field(
+        title="Nickname",
+        default=None,
+        example="Jenix",
+    )
+    phone_number: str | None = Field(
+        title="Phone Number",
+        default=None,
+        example="1234567890",
+    )
+    is_active: bool | None = Field(
         title="",
         default=None,
         example=""
@@ -128,7 +135,6 @@ class SearchProfilesDTO(CreateProfileDTO):
         default=10, 
         examples=10
     )
-    @classmethod
     def is_only_pagination(self):
         pagination_fields = {"page", "page_size", "is_active"}
 
@@ -136,13 +142,16 @@ class SearchProfilesDTO(CreateProfileDTO):
             if field_name not in pagination_fields and value is not None:
                 return False
         return True
+    @field_validator("is_active", mode="before")
+    def parse_is_active(cls, input):
+        return ParseBool(input)
     
 class GetProfileConversationsDTO(BaseDTO):
     profile_id: UUID = Field(
         title="Profile ID",
         example="123e4567-e89b-12d3-a456-426655440000",
     )
-    is_active: str | None = Field(
+    is_active: bool | None = Field(
         title="",
         default=None,
         example=""
@@ -160,3 +169,6 @@ class GetProfileConversationsDTO(BaseDTO):
         default=10, 
         examples=10
     )
+    @field_validator("is_active", mode="before")
+    def parse_is_active(cls, input):
+        return ParseBool(input)

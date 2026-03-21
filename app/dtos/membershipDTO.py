@@ -52,7 +52,6 @@ class SearchMembershipDTO(BaseDTO):
         examples=10
     )
 
-    @classmethod
     def is_only_pagination(cls):
         pagination_fields = {"page", "page_size"}
 

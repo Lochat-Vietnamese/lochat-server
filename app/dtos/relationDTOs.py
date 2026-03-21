@@ -64,7 +64,6 @@ class SearchRelationsDTO(BaseDTO):
         return ParseBool(input)
     
     @field_validator("type", mode="before")
-    @classmethod
     def validate_relation_type(cls, value: str | None):
         if value is None:
             return value
@@ -73,7 +72,6 @@ class SearchRelationsDTO(BaseDTO):
         return value
    
     @field_validator("status", mode="before")
-    @classmethod
     def validate_relation_status(cls, value: str | None):
         if value is None:
             return value
@@ -81,7 +79,6 @@ class SearchRelationsDTO(BaseDTO):
             raise ValueError("Invalid relation status")
         return value
     
-    @classmethod
     def is_only_pagination(self):
         pagination_fields = {"page", "page_size", "is_active"}
 
@@ -111,7 +108,6 @@ class CreateRelationDTO(BaseDTO):
     )
 
     @field_validator("type", mode="before")
-    @classmethod
     def validate_relation_type(cls, value: str | None):
         if value is None:
             return value
@@ -120,7 +116,6 @@ class CreateRelationDTO(BaseDTO):
         return value
    
     @field_validator("status", mode="before")
-    @classmethod
     def validate_relation_status(cls, value: str | None):
         if value is None:
             return value
@@ -155,7 +150,6 @@ class UpdateRelationDTO(BaseDTO):
         return ParseBool(input)
     
     @field_validator("type", mode="before")
-    @classmethod
     def validate_relation_type(cls, value: str | None):
         if value is None:
             return value
@@ -164,7 +158,6 @@ class UpdateRelationDTO(BaseDTO):
         return value
    
     @field_validator("status", mode="before")
-    @classmethod
     def validate_relation_status(cls, value: str | None):
         if value is None:
             return value
